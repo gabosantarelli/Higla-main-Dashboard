@@ -109,7 +109,7 @@ tr:hover td{background:rgba(59,130,246,.04)}tr.hl td{font-weight:700;color:var(-
       <label><input type="checkbox" checked onchange="renderCierres()" class="plCheck" value="VM"> Villa Mercedes</label>
       <label><input type="checkbox" checked onchange="renderCierres()" class="plCheck" value="SG"> Santa Giulia</label>
     </div>
-    <table><thead><tr><th>Mes</th><th>Plantas</th><th class="num">Faena</th><th class="num">Aptos</th><th class="num">%</th><th class="num">Kg Prod.</th><th class="num">Ingreso USD</th><th class="num">Costos USD</th><th class="num">Resultado USD</th></tr></thead><tbody id="hCB"></tbody></table></div>
+    <table><thead><tr><th>Mes</th><th>Plantas</th><th class="num">Faena</th><th class="num">Aptos</th><th class="num">%</th><th class="num">Kg Prod.</th><th class="num">Ingreso USD</th><th class="num">Costos Higla</th><th class="num">Resultado (consol.)</th></tr></thead><tbody id="hCB"></tbody></table></div>
   <div class="card"><h2>Resumen de plantas activas</h2><table><tr><th>Planta</th><th>Ubicación</th><th>Operador</th><th>Destinos</th><th>Responsable</th><th>Estado</th></tr>
     <tr><td><strong>Nelson</strong></td><td>Nelson, Santa Fe</td><td>Friar</td><td>USA / Canadá / Israel</td><td>Milena Rosales</td><td><span class="pill green">Activa</span></td></tr>
     <tr><td><strong>Carcarañá</strong></td><td>Carcarañá, Santa Fe</td><td>Lequio S.A.</td><td>USA / Israel</td><td>Adrián Mosqueira</td><td><span class="pill green">Activa</span></td></tr>
@@ -195,10 +195,31 @@ tr:hover td{background:rgba(59,130,246,.04)}tr.hl td{font-weight:700;color:var(-
 
 <!-- ══════ CARCARAÑÁ ══════ -->
 <section id="carca">
-  <div class="sub-nav" id="cSN"><a href="#" data-sub="cInfo" class="active">Información</a><a href="#" data-sub="cEcon">Resultado Económico (Mattievich)</a></div>
-  <div class="sub-section active" id="cInfo">
-    <div class="empty-state"><div class="emoji">🏭</div><p><strong>Carcarañá / Lequio SA</strong> — Datos pendientes</p><p style="margin-top:8px;font-size:11px">Responsable: Adrián Mosqueira · Ubicación: Carcarañá, Santa Fe</p></div>
+  <div class="sub-nav" id="cSN"><a href="#" data-sub="cKpi" class="active">KPIs Productivos</a><a href="#" data-sub="cEcon">Resultado Económico</a></div>
+
+  <div class="sub-section active" id="cKpi">
+    <div class="kpi-row">
+      <div class="kpi"><div class="label">Faena total</div><div class="value" id="cf">–</div><div class="sub" id="cfs">–</div></div>
+      <div class="kpi green"><div class="label">Aptos total</div><div class="value" id="ca">–</div><div class="sub" id="cas">–</div></div>
+      <div class="kpi green"><div class="label">Cab/día prom.</div><div class="value" id="ccd">–</div><div class="sub">faena diaria</div></div>
+      <div class="kpi"><div class="label">Kg PT acum.</div><div class="value" id="cpt2">–</div><div class="sub">producto terminado</div></div>
+      <div class="kpi"><div class="label">Rinde desp. prom.</div><div class="value" id="crd">–</div><div class="sub">PT / pechos kg</div></div>
+      <div class="kpi"><div class="label">Semanas</div><div class="value" id="csem">–</div><div class="sub">con producción</div></div>
+    </div>
+    <div class="card">
+      <h2>Faena semanal y aptitud (%) – Israel 2025</h2>
+      <div class="chart-box"><canvas id="cCaFa"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Detalle semanal</h2>
+      <table>
+        <thead><tr><th>Semana</th><th>Fecha inicio</th><th class="num">Días</th><th class="num">Faena</th><th class="num">Aptos</th><th class="num">% Aptos</th><th class="num">Pechos kg</th><th class="num">PT kg</th><th class="num">Rinde %</th></tr></thead>
+        <tbody id="cDetBody"></tbody>
+      </table>
+    </div>
+    <div class="note">Datos disponibles: temporada Israel 2025 (ene–feb 2025). Operador: Lequio S.A. · Responsable: Adrián Mosqueira.</div>
   </div>
+
   <div class="sub-section" id="cEcon">
     <div class="card"><h2>Resultados económicos – Mattievich / Carcarañá</h2>
       <table><thead><tr><th>Mes</th><th class="num">Faena</th><th class="num">Aptos</th><th class="num">%</th><th class="num">Kg Prod.</th><th class="num">Ingreso USD</th></tr></thead><tbody id="cEconBody"></tbody></table>
@@ -208,7 +229,24 @@ tr:hover td{background:rgba(59,130,246,.04)}tr.hl td{font-weight:700;color:var(-
 
 <!-- ══════ VILLA MERCEDES ══════ -->
 <section id="vm">
-  <div class="empty-state"><div class="emoji">🏗️</div><p><strong>Villa Mercedes / Minerva Foods</strong> — En ramp-up</p><p style="margin-top:8px;font-size:11px">Enero 2026: 1.962 cabezas · Responsables: G. Rapaporte / P. Martínez</p></div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">Faena total (S14-S15)</div><div class="value" style="font-size:18px">2.172</div><div class="sub">6 días · mar-abr 2025</div></div>
+    <div class="kpi green"><div class="label">Aptos total</div><div class="value" style="font-size:18px">1.609 <span style="font-size:12px">(74.1%)</span></div><div class="sub">aptitud</div></div>
+    <div class="kpi"><div class="label">Kg PT</div><div class="value" style="font-size:18px">97 Tns</div><div class="sub">producto terminado</div></div>
+    <div class="kpi"><div class="label">Rinde desp.</div><div class="value" style="font-size:18px">57.9%</div><div class="sub">PT / pechos</div></div>
+  </div>
+  <div class="card">
+    <h2>Detalle semanal – Israel 2025</h2>
+    <table>
+      <thead><tr><th>Semana</th><th>Fecha inicio</th><th class="num">Días</th><th class="num">Faena</th><th class="num">Aptos</th><th class="num">%</th><th class="num">Pechos kg</th><th class="num">PT kg</th><th class="num">Rinde %</th></tr></thead>
+      <tbody>
+        <tr><td><strong>S14</strong></td><td>31/03/25</td><td class="num">4</td><td class="num">1.454</td><td class="num">1.080</td><td class="num" style="color:var(--accent2)">74.3%</td><td class="num">63.198</td><td class="num">35.925</td><td class="num">56.8%</td></tr>
+        <tr><td><strong>S15</strong></td><td>07/04/25</td><td class="num">2</td><td class="num">718</td><td class="num">529</td><td class="num" style="color:var(--accent2)">73.7%</td><td class="num">104.079</td><td class="num">61.034</td><td class="num">58.6%</td></tr>
+        <tr class="hl"><td colspan="2"><strong>TOTAL</strong></td><td class="num"><strong>6</strong></td><td class="num"><strong>2.172</strong></td><td class="num"><strong>1.609</strong></td><td class="num"><strong>74.1%</strong></td><td class="num"><strong>167.277</strong></td><td class="num"><strong>96.959</strong></td><td class="num"><strong>57.9%</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">Datos limitados: solo 2 semanas de temporada Israel 2025. Enero 2026: 1.962 cab. (cierre mensual). Operador: Minerva Foods. Responsables: G. Rapaporte / P. Martínez.</div>
 </section>
 
 <!-- ══════ SANTA GIULIA ══════ -->
@@ -283,45 +321,57 @@ updateHome();
 const hm=EC.map(e=>e.m.replace(' 2025',' 25').replace(' 2026',' 26'));
 new Chart(document.getElementById('chHR'),{type:'bar',data:{labels:hm,datasets:[{label:'Resultado USD',data:EC.map(e=>e.rs),backgroundColor:EC.map(e=>e.rs>50000?'#10B981':e.rs>0?'#3B82F6':'#EF4444'),borderRadius:4,barThickness:24}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:G},ticks:{callback:v=>'$'+fmt(v)}},x:{grid:{display:false}}}}});
 new Chart(document.getElementById('chHF'),{type:'line',data:{labels:W.map(w=>w.l+'('+w.d.substring(2,4)+')'),datasets:[{label:'Faena',data:W.map(w=>w.f),borderColor:'#3B82F6',borderWidth:1.5,fill:false,tension:.2,pointRadius:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:G}},x:{grid:{display:false},ticks:{maxRotation:45,autoSkip:true,maxTicksLimit:20}}}}});
-// Cierres with plant filters
-const ECD_ALL=[
-{m:"Jul 2025",tags:["Friar"],f:6651,a:4471,kg:319362,ig:95808,co:42695,rs:79889},
-{m:"Jul 2025",tags:["Matt"],f:5001,a:3471,kg:227834,ig:22783,co:0,rs:0},
-{m:"Ago 2025",tags:["Friar"],f:6382,a:4185,kg:264661,ig:79398,co:39115,rs:63244},
-{m:"Ago 2025",tags:["Matt"],f:4379,a:2935,kg:196521,ig:19652,co:0,rs:0},
-{m:"Sep 2025",tags:["Friar"],f:4651,a:3261,kg:226902,ig:68071,co:35075,rs:40721},
-{m:"Oct 2025",tags:["Friar"],f:2957,a:2166,kg:98032,ig:29409,co:22398,rs:9868},
-{m:"Oct 2025",tags:["Matt"],f:782,a:433,kg:16318,ig:1632,co:0,rs:0},
-{m:"Nov 2025",tags:["Friar"],f:6558,a:4861,kg:293131,ig:87939,co:38247,rs:79164},
-{m:"Nov 2025",tags:["Matt"],f:5907,a:3803,kg:258072,ig:25807,co:0,rs:0},
-{m:"Dic 2025",tags:["Friar"],f:7311,a:5536,kg:340905,ig:102272,co:42204,rs:89761},
-{m:"Dic 2025",tags:["Matt"],f:6109,a:3985,kg:254326,ig:25433,co:0,rs:0},
-{m:"Ene 2026",tags:["Friar"],f:7216,a:5060,kg:319466,ig:95840,co:40704,rs:104047},
-{m:"Ene 2026",tags:["Matt"],f:6155,a:4154,kg:290734,ig:29073,co:0,rs:0},
-{m:"Ene 2026",tags:["VM"],f:1962,a:972,kg:48550,ig:4855,co:0,rs:0},
-{m:"Ene 2026",tags:["SG"],f:4078,a:1798,kg:109891,ig:10989,co:0,rs:0},
-{m:"Feb 2026",tags:["Friar"],f:5611,a:4076,kg:269340,ig:80802,co:37195,rs:77716},
-{m:"Feb 2026",tags:["Matt"],f:3842,a:2437,kg:202860,ig:20286,co:0,rs:0},
-{m:"Feb 2026",tags:["SG"],f:3652,a:1821,kg:104563,ig:10456,co:0,rs:0},
-{m:"Mar 2026",tags:["Friar"],f:2998,a:2009,kg:102027,ig:30608,co:25483,rs:6400}
+// Cierres with plant filters - costos Higla separados
+const ECD_PL=[
+{m:"Jul 2025",t:"Friar",f:6651,a:4471,kg:319362,ig:95808},
+{m:"Jul 2025",t:"Matt",f:5001,a:3471,kg:227834,ig:22783},
+{m:"Ago 2025",t:"Friar",f:6382,a:4185,kg:264661,ig:79398},
+{m:"Ago 2025",t:"Matt",f:4379,a:2935,kg:196521,ig:19652},
+{m:"Sep 2025",t:"Friar",f:4651,a:3261,kg:226902,ig:68071},
+{m:"Oct 2025",t:"Friar",f:2957,a:2166,kg:98032,ig:29409},
+{m:"Oct 2025",t:"Matt",f:782,a:433,kg:16318,ig:1632},
+{m:"Nov 2025",t:"Friar",f:6558,a:4861,kg:293131,ig:87939},
+{m:"Nov 2025",t:"Matt",f:5907,a:3803,kg:258072,ig:25807},
+{m:"Dic 2025",t:"Friar",f:7311,a:5536,kg:340905,ig:102272},
+{m:"Dic 2025",t:"Matt",f:6109,a:3985,kg:254326,ig:25433},
+{m:"Ene 2026",t:"Friar",f:7216,a:5060,kg:319466,ig:95840},
+{m:"Ene 2026",t:"Matt",f:6155,a:4154,kg:290734,ig:29073},
+{m:"Ene 2026",t:"VM",f:1962,a:972,kg:48550,ig:4855},
+{m:"Ene 2026",t:"SG",f:4078,a:1798,kg:109891,ig:10989},
+{m:"Feb 2026",t:"Friar",f:5611,a:4076,kg:269340,ig:80802},
+{m:"Feb 2026",t:"Matt",f:3842,a:2437,kg:202860,ig:20286},
+{m:"Feb 2026",t:"SG",f:3652,a:1821,kg:104563,ig:10456},
+{m:"Mar 2026",t:"Friar",f:2998,a:2009,kg:102027,ig:30608}
 ];
+const COSTOS_HIGLA={
+"Jul 2025":42695,"Ago 2025":39115,"Sep 2025":35075,"Oct 2025":22398,
+"Nov 2025":38247,"Dic 2025":42204,"Ene 2026":40704,"Feb 2026":37195,"Mar 2026":25483
+};
+const RES_CONSOLIDADO={
+"Jul 2025":79889,"Ago 2025":63244,"Sep 2025":40721,"Oct 2025":9868,
+"Nov 2025":79164,"Dic 2025":89761,"Ene 2026":104047,"Feb 2026":77716,"Mar 2026":6400
+};
 function renderCierres(){
   const checks=document.querySelectorAll('.plCheck');const active=[];checks.forEach(c=>{if(c.checked)active.push(c.value)});
-  // Group by month
-  const months=[...new Set(ECD_ALL.map(e=>e.m))];
+  const months=[...new Set(ECD_PL.map(e=>e.m))];
   const hB=document.getElementById('hCB');hB.innerHTML='';
-  let t1=0,t2=0,t3=0,t4=0,t5=0,t6=0;
+  let tF=0,tA=0,tKg=0,tIg=0,tCo=0,tRs=0;
   months.forEach(m=>{
-    const rows=ECD_ALL.filter(e=>e.m===m&&e.tags.some(t=>active.includes(t)));
+    const rows=ECD_PL.filter(e=>e.m===m&&active.includes(e.t));
     if(rows.length===0)return;
-    const f=rows.reduce((s,r)=>s+r.f,0),a=rows.reduce((s,r)=>s+r.a,0),kg=rows.reduce((s,r)=>s+r.kg,0),ig=rows.reduce((s,r)=>s+r.ig,0),co=rows.reduce((s,r)=>s+r.co,0),rs=rows.reduce((s,r)=>s+r.rs,0);
-    const pls=rows.map(r=>r.tags[0]).join('+');const pc=f>0?(a/f*100).toFixed(1):0;
-    t1+=f;t2+=a;t3+=kg;t4+=ig;t5+=co;t6+=rs;
-    const tr=document.createElement('tr');tr.innerHTML=`<td>${m}</td><td><span style="font-size:10px;color:var(--text3)">${pls}</span></td><td class="num">${fN(f)}</td><td class="num">${fN(a)}</td><td class="num">${pc}%</td><td class="num">${fN(kg)}</td><td class="num">${fN(ig)}</td><td class="num">${fN(co)}</td><td class="num" style="color:${rs>0?'var(--accent2)':'var(--text3)'}"><strong>${fN(rs)}</strong></td>`;
+    const f=rows.reduce((s,r)=>s+r.f,0),a=rows.reduce((s,r)=>s+r.a,0),kg=rows.reduce((s,r)=>s+r.kg,0),ig=rows.reduce((s,r)=>s+r.ig,0);
+    const co=COSTOS_HIGLA[m]||0;const rs=RES_CONSOLIDADO[m]||0;
+    const pls=rows.map(r=>r.t).join('+');const pc=f>0?(a/f*100).toFixed(1):0;
+    tF+=f;tA+=a;tKg+=kg;tIg+=ig;tCo+=co;tRs+=rs;
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+m+'</td><td><span style="font-size:10px;color:var(--text3)">'+pls+'</span></td><td class="num">'+fN(f)+'</td><td class="num">'+fN(a)+'</td><td class="num">'+pc+'%</td><td class="num">'+fN(kg)+'</td><td class="num">'+fN(ig)+'</td><td class="num" style="color:var(--text3)">'+fN(co)+'</td><td class="num" style="color:'+(rs>0?'var(--accent2)':'var(--text3)')+'"><strong>'+fN(rs)+'</strong></td>';
     hB.appendChild(tr)});
-  const rT=document.createElement('tr');rT.className='hl';rT.innerHTML=`<td colspan="2"><strong>TOTAL</strong></td><td class="num"><strong>${fN(t1)}</strong></td><td class="num"><strong>${fN(t2)}</strong></td><td class="num"><strong>${t1>0?(t2/t1*100).toFixed(1):0}%</strong></td><td class="num"><strong>${fN(t3)}</strong></td><td class="num"><strong>${fN(t4)}</strong></td><td class="num"><strong>${fN(t5)}</strong></td><td class="num"><strong>${fN(t6)}</strong></td>`;
-  hB.appendChild(rT);
-}
+  // Costos note row
+  const nr=document.createElement('tr');nr.innerHTML='<td colspan="9" style="font-size:10px;color:var(--accent3);padding:6px 10px;border:none"><em>Costos = equipo Higla (sueldos, comisiones, viáticos, OSDE). Resultado = consolidado todas las plantas.</em></td>';
+  hB.appendChild(nr);
+  const rT=document.createElement('tr');rT.className='hl';
+  rT.innerHTML='<td colspan="2"><strong>TOTAL</strong></td><td class="num"><strong>'+fN(tF)+'</strong></td><td class="num"><strong>'+fN(tA)+'</strong></td><td class="num"><strong>'+(tF>0?(tA/tF*100).toFixed(1):0)+'%</strong></td><td class="num"><strong>'+fN(tKg)+'</strong></td><td class="num"><strong>'+fN(tIg)+'</strong></td><td class="num"><strong>'+fN(tCo)+'</strong></td><td class="num"><strong>'+fN(tRs)+'</strong></td>';
+  hB.appendChild(rT)}
 renderCierres();
 
 // NELSON
@@ -385,7 +435,37 @@ function updateEcon(){
 }
 updateEcon();
 
-// Carcarañá Mattievich
+// Carcarañá KPIs
+const CW=[{l:"S02",d:"2025-01-10",f:239,a:156,p:65.3,pk:0,pt:0,rd:0,dd:1},{l:"S03",d:"2025-01-13",f:997,a:653,p:65.5,pk:60720,pt:36000,rd:59.3,dd:5},{l:"S04",d:"2025-01-20",f:963,a:600,p:62.3,pk:54871,pt:31681,rd:57.7,dd:5},{l:"S05",d:"2025-01-27",f:1306,a:839,p:64.2,pk:98577,pt:56561,rd:57.4,dd:5},{l:"S06",d:"2025-02-03",f:417,a:276,p:66.2,pk:27057,pt:15929,rd:58.9,dd:2}];
+(function(){
+  const tF=CW.reduce((a,w)=>a+w.f,0),tA=CW.reduce((a,w)=>a+w.a,0),tPK=CW.reduce((a,w)=>a+w.pk,0),tPT=CW.reduce((a,w)=>a+w.pt,0),tD=CW.reduce((a,w)=>a+w.dd,0);
+  const pct=tF>0?(tA/tF*100).toFixed(1):0;
+  document.getElementById('cf').textContent=fN(tF);document.getElementById('cfs').textContent=CW.length+' sem · '+tD+' días';
+  document.getElementById('ca').innerHTML=fN(tA)+' <span style="font-size:12px;color:var(--accent2)">('+pct+'%)</span>';document.getElementById('cas').textContent='aptitud total';
+  document.getElementById('ccd').textContent=tD>0?Math.round(tF/tD):'–';
+  document.getElementById('cpt2').textContent=fTn(tPT)+' Tns';
+  document.getElementById('crd').textContent=tPK>0?(tPT/tPK*100).toFixed(1)+'%':'–';
+  document.getElementById('csem').textContent=CW.length;
+  // Chart
+  new Chart(document.getElementById('cCaFa'),{type:'bar',data:{labels:CW.map(w=>w.l),datasets:[
+    {label:'Faena',data:CW.map(w=>w.f),backgroundColor:'rgba(59,130,246,.35)',borderColor:'#3B82F6',borderWidth:1,borderRadius:3,order:2,yAxisID:'y'},
+    {label:'Aptos',data:CW.map(w=>w.a),backgroundColor:'rgba(16,185,129,.5)',borderColor:'#10B981',borderWidth:1,borderRadius:3,order:1,yAxisID:'y'},
+    {label:'% Apt.',data:CW.map(w=>w.p),type:'line',borderColor:'#F59E0B',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#F59E0B',fill:false,yAxisID:'y1',order:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,grid:{color:G},position:'left'},y1:{position:'right',min:0,max:100,grid:{display:false},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+  // Detail table
+  const db=document.getElementById('cDetBody');
+  let dtF=0,dtA=0,dtPK=0,dtPT=0,dtD=0;
+  CW.forEach(w=>{dtF+=w.f;dtA+=w.a;dtPK+=w.pk;dtPT+=w.pt;dtD+=w.dd;
+    const dt=w.d.split('-');const ds=dt[2]+'/'+dt[1]+'/'+dt[0].substring(2);
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td><strong>Semana '+w.l.replace('S','')+'</strong></td><td>'+ds+'</td><td class="num">'+w.dd+'</td><td class="num">'+fN(w.f)+'</td><td class="num">'+fN(w.a)+'</td><td class="num" style="color:'+pctColor(w.p)+'">'+w.p+'%</td><td class="num">'+fN(w.pk)+'</td><td class="num">'+fN(w.pt)+'</td><td class="num">'+(w.rd>0?w.rd+'%':'–')+'</td>';
+    db.appendChild(tr)});
+  const ttr=document.createElement('tr');ttr.className='hl';
+  ttr.innerHTML='<td colspan="2"><strong>TOTAL</strong></td><td class="num"><strong>'+dtD+'</strong></td><td class="num"><strong>'+fN(dtF)+'</strong></td><td class="num"><strong>'+fN(dtA)+'</strong></td><td class="num"><strong>'+(dtF>0?(dtA/dtF*100).toFixed(1):0)+'%</strong></td><td class="num"><strong>'+fN(dtPK)+'</strong></td><td class="num"><strong>'+fN(dtPT)+'</strong></td><td class="num"><strong>'+(dtPK>0?(dtPT/dtPK*100).toFixed(1):0)+'%</strong></td>';
+  db.appendChild(ttr);
+})();
+
+// Carcarañá Mattievich econ
 const cEB=document.getElementById('cEconBody');let cti=0;
 EDM.forEach(e=>{cti+=e.ig;const r=document.createElement('tr');r.innerHTML=`<td>${e.m}</td><td class="num">${fN(e.f)}</td><td class="num">${fN(e.a)}</td><td class="num">${e.pc}%</td><td class="num">${fmt(e.kg)}</td><td class="num">${fN(e.ig)}</td>`;cEB.appendChild(r)});
 const cTr=document.createElement('tr');cTr.className='hl';cTr.innerHTML=`<td colspan="5"><strong>TOTAL</strong></td><td class="num"><strong>${fN(cti)}</strong></td>`;cEB.appendChild(cTr);
