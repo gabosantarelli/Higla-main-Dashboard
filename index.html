@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIGLA SRL – Panel de Control</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0F19;--bg2:#111827;--bg3:#1F2937;--bg4:#374151;--accent:#3B82F6;--accent2:#10B981;--accent3:#F59E0B;--warn:#EF4444;--text:#F9FAFB;--text2:#D1D5DB;--text3:#9CA3AF;--border:#374151;--card:#111827}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.hdr-logo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;letter-spacing:1px}
+.hdr h1{font-size:17px;font-weight:700;letter-spacing:-.3px}.hdr .subtitle{font-size:11px;color:var(--text3);margin-top:1px}
+.hdr-right{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;text-align:right}
+.nav{background:var(--bg2);display:flex;gap:0;border-bottom:1px solid var(--border);overflow-x:auto;position:sticky;top:60px;z-index:99}
+.nav a{color:var(--text3);text-decoration:none;padding:11px 18px;font-size:11px;font-weight:600;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;text-transform:uppercase}
+.nav a:hover{color:var(--text);background:rgba(255,255,255,.03)}.nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav .sep{width:1px;background:var(--border);margin:8px 0;flex-shrink:0}
+.container{max-width:1440px;margin:0 auto;padding:16px 24px}
+section{display:none}section.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px}
+.card h2{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.section-title{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:16px;font-weight:700}
+.section-title .icon{width:32px;height:32px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);border-radius:10px 10px 0 0}
+.kpi.green::before{background:var(--accent2)}.kpi.warn::before{background:var(--accent3)}.kpi.red::before{background:var(--warn)}
+.kpi .label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;font-weight:600}
+.kpi .value{font-size:22px;font-weight:700;margin:5px 0 2px;font-family:'JetBrains Mono','DM Sans',sans-serif;letter-spacing:-.5px;color:var(--accent)}
+.kpi .sub{font-size:10px;color:var(--text3)}
+.kpi.green .value{color:var(--accent2)}.kpi.warn .value{color:var(--accent3)}.kpi.red .value{color:var(--warn)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--bg3);color:var(--text2);padding:9px 10px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text2)}
+tr:hover td{background:rgba(59,130,246,.04)}tr.hl td{font-weight:700;color:var(--accent);background:rgba(59,130,246,.08)}
+.num{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px}
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filter-bar label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.filter-bar select{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif}
+.filter-bar select:focus{outline:none;border-color:var(--accent)}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.3px}
+.pill.blue{background:rgba(59,130,246,.15);color:var(--accent)}.pill.green{background:rgba(16,185,129,.15);color:var(--accent2)}.pill.warn{background:rgba(245,158,11,.15);color:var(--accent3)}.pill.red{background:rgba(239,68,68,.15);color:var(--warn)}
+.chart-box{position:relative;height:300px;margin:10px 0}.chart-box.sm{height:220px}
+.note{background:rgba(245,158,11,.08);border-left:3px solid var(--accent3);padding:9px 12px;font-size:11px;color:var(--text3);margin:10px 0;border-radius:0 6px 6px 0}
+.note.red{background:rgba(239,68,68,.08);border-left-color:var(--warn)}
+.footer{text-align:center;padding:20px;color:var(--text3);font-size:10px;border-top:1px solid var(--border);margin-top:30px}
+.sub-nav{display:flex;gap:0;margin-bottom:14px;border-bottom:1px solid var(--border)}
+.sub-nav a{color:var(--text3);text-decoration:none;padding:9px 16px;font-size:11px;font-weight:600;border-bottom:2px solid transparent;transition:all .2s}
+.sub-nav a:hover{color:var(--text)}.sub-nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+.sub-section{display:none}.sub-section.active{display:block}
+.input-group{margin-bottom:10px}
+.input-group label{display:block;font-size:10px;font-weight:600;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px}
+.input-group input{width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif}
+.input-group input:focus{outline:none;border-color:var(--accent)}
+.btn{background:var(--accent);color:white;border:none;padding:8px 20px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}.btn:hover{background:#2563EB}.btn.sec{background:var(--bg4)}
+.check-bar{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.check-bar label{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);cursor:pointer;user-select:none}
+.check-bar input[type=checkbox]{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-state .emoji{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:13px}
+.pct-color{font-weight:700}
+</style>
+</head>
+<body>
+<div class="hdr"><div class="hdr-left"><div class="hdr-logo">H</div><div><h1>HIGLA SRL</h1><div class="subtitle">Panel de Control Operativo</div></div></div><div class="hdr-right">Gerencia de Planificación<br><span id="dateDisp"></span></div></div>
+<div class="nav" id="mainNav">
+  <a href="#" data-tab="home" class="active">Home</a>
+  <a href="#" data-tab="nelson">Nelson</a>
+  <a href="#" data-tab="carca">Carcarañá</a>
+  <a href="#" data-tab="vm">Villa Mercedes</a>
+  <a href="#" data-tab="sg">Santa Giulia</a>
+  <div class="sep"></div>
+  <a href="#" data-tab="copra">COPRA</a>
+  <div class="sep"></div>
+  <a href="#" data-tab="planes">Planes de Negocio</a>
+</div>
+<div class="container">
+
+<!-- ══════ HOME ══════ -->
+<section id="home" class="active">
+  <div class="section-title"><div class="icon">H</div> KPIs Consolidados</div>
+  <div class="filter-bar">
+    <label>Temporada</label>
+    <select id="hSF" onchange="updateHome()"><option value="all">Todas</option><option value="Israel 2025">Israel 2025</option><option value="Eres 2025">Eres 2025</option><option value="Canada/USA 2025">Canada/USA 2025</option><option value="USA 2025-26" selected>USA 2025-26</option></select>
+    <label style="margin-left:12px">Mes</label>
+    <select id="hMF" onchange="updateHome()"><option value="all">Todos</option><option value="Oct">Octubre</option><option value="Nov">Noviembre</option><option value="Dic">Diciembre</option><option value="Ene">Enero</option><option value="Feb">Febrero</option><option value="Mar">Marzo</option></select>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">Faena acum. temporada</div><div class="value" id="h_f">–</div><div class="sub">cabezas totales</div></div>
+    <div class="kpi green"><div class="label">Aptos acum.</div><div class="value" id="h_a">–</div><div class="sub" id="h_as">% sobre faena</div></div>
+    <div class="kpi warn"><div class="label">Kg PT acum.</div><div class="value" id="h_pt">–</div><div class="sub">producto terminado</div></div>
+    <div class="kpi"><div class="label">Resultado acum.</div><div class="value" id="h_r">–</div><div class="sub">USD operativo (Friar)</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><h2>Resultado operativo mensual (USD)</h2><div class="chart-box sm"><canvas id="chHR"></canvas></div></div>
+    <div class="card"><h2>Faena semanal – todas las temporadas</h2><div class="chart-box sm"><canvas id="chHF"></canvas></div></div>
+  </div>
+  <div class="card"><h2>Cierres mensuales</h2>
+    <div class="check-bar"><span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Plantas:</span>
+      <label><input type="checkbox" checked onchange="renderCierres()" class="plCheck" value="Friar"> Friar/Nelson</label>
+      <label><input type="checkbox" checked onchange="renderCierres()" class="plCheck" value="Matt"> Mattievich/Carca</label>
+      <label><input type="checkbox" checked onchange="renderCierres()" class="plCheck" value="VM"> Villa Mercedes</label>
+      <label><input type="checkbox" checked onchange="renderCierres()" class="plCheck" value="SG"> Santa Giulia</label>
+    </div>
+    <table><thead><tr><th>Mes</th><th>Plantas</th><th class="num">Faena</th><th class="num">Aptos</th><th class="num">%</th><th class="num">Kg Prod.</th><th class="num">Ingreso USD</th><th class="num">Costos USD</th><th class="num">Resultado USD</th></tr></thead><tbody id="hCB"></tbody></table></div>
+  <div class="card"><h2>Resumen de plantas activas</h2><table><tr><th>Planta</th><th>Ubicación</th><th>Operador</th><th>Destinos</th><th>Responsable</th><th>Estado</th></tr>
+    <tr><td><strong>Nelson</strong></td><td>Nelson, Santa Fe</td><td>Friar</td><td>USA / Canadá / Israel</td><td>Milena Rosales</td><td><span class="pill green">Activa</span></td></tr>
+    <tr><td><strong>Carcarañá</strong></td><td>Carcarañá, Santa Fe</td><td>Lequio S.A.</td><td>USA / Israel</td><td>Adrián Mosqueira</td><td><span class="pill green">Activa</span></td></tr>
+    <tr><td><strong>Villa Mercedes</strong></td><td>Villa Mercedes, San Luis</td><td>Minerva Foods</td><td>Israel / local</td><td>G. Rapaporte / P. Martínez</td><td><span class="pill warn">En ramp-up</span></td></tr>
+    <tr><td><strong>Santa Giulia</strong></td><td>Alejandro Korn, Buenos Aires</td><td>Santa Giulia</td><td>Israel / local</td><td>G. Rapaporte / P. Martínez</td><td><span class="pill warn">En ramp-up</span></td></tr>
+  </table><div class="note">Solo Friar/Nelson tiene datos cargados completos. Carcarañá, V.Mercedes y Santa Giulia se irán incorporando.</div></div>
+</section>
+
+<!-- ══════ NELSON ══════ -->
+<section id="nelson">
+  <div class="sub-nav" id="fSN"><a href="#" data-sub="fKpi" class="active">KPIs Productivos</a><a href="#" data-sub="fEcon">Resultado Económico</a><a href="#" data-sub="fPrec">Precios Vigentes</a><a href="#" data-sub="fProg">Programación</a></div>
+
+  <div class="sub-section active" id="fKpi">
+    <div class="filter-bar"><label>Temporada</label><select id="fSF" onchange="updateFriar()"><option value="all">Todas</option><option value="Israel 2025">Israel 2025</option><option value="Eres 2025">Eres 2025</option><option value="Canada/USA 2025">Canada/USA 2025</option><option value="USA 2025-26" selected>USA 2025-26</option></select></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="label">Faena total</div><div class="value" id="ff">–</div><div class="sub" id="ffs">–</div></div>
+      <div class="kpi green"><div class="label">Aptos total</div><div class="value" id="fa">–</div><div class="sub" id="fas">–</div></div>
+      <div class="kpi green"><div class="label">Cab/día prom.</div><div class="value" id="fcd">–</div><div class="sub">faena diaria</div></div>
+      <div class="kpi"><div class="label">Kg PT acum.</div><div class="value" id="fpt">–</div><div class="sub">producto terminado</div></div>
+      <div class="kpi"><div class="label">Rinde desp. prom.</div><div class="value" id="frd">–</div><div class="sub">PT / pechos kg</div></div>
+      <div class="kpi"><div class="label">Semanas</div><div class="value" id="fsem">–</div><div class="sub">con producción</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Faena semanal y aptitud (%)</h2>
+      <div class="chart-box"><canvas id="cFaApt"></canvas></div>
+    </div>
+
+    <div class="g2">
+      <div class="card"><h2>Kg Producto terminado semanal</h2><div class="chart-box"><canvas id="cPT"></canvas></div></div>
+      <div class="card"><h2>Rinde despostada (%)</h2><div class="chart-box"><canvas id="cRd"></canvas></div></div>
+    </div>
+
+    <div class="card">
+      <h2>Detalle semanal</h2>
+      <table>
+        <thead><tr><th>Semana</th><th>Fecha inicio</th><th class="num">Días</th><th class="num">Faena</th><th class="num">Aptos</th><th class="num">% Aptos</th><th class="num">Pechos kg</th><th class="num">PT kg</th><th class="num">Rinde %</th></tr></thead>
+        <tbody id="detBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Precios vigentes (28/01/2026) – USD/Tn por tipo de hacienda</h2>
+      <div class="g2">
+        <div>
+          <table>
+            <tr><th>Tipo</th><th class="num">Set integrado</th><th class="num">Compra</th><th class="num">Venta</th></tr>
+            <tr><td>Novillo Pasto (Grass Fed)</td><td class="num">10.237</td><td class="num">9.700</td><td class="num">10.000</td></tr>
+            <tr><td>Novillo Grano (Feedlot)</td><td class="num">11.215</td><td class="num">10.700</td><td class="num">11.000</td></tr>
+            <tr><td>Vaca (Grass Fed Cows)</td><td class="num">9.218</td><td class="num">8.700</td><td class="num">9.000</td></tr>
+            <tr><td>Angus (Feedlot)</td><td class="num">12.014</td><td class="num">11.500</td><td class="num">11.800</td></tr>
+            <tr><td>Sapphire (Feedlot)</td><td class="num">13.900</td><td class="num">13.500</td><td class="num">13.900</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="note" style="margin-top:0"><strong>Estructura de costos por pecho:</strong><br>Set integrado = suma de cortes × rendimiento × precio FOB<br>+ BL Fee: USD 300/Tn<br>+ Friar Service: USD 1200/Tn<br>Margen = Precio de venta – Set integrado total</div>
+          <div class="note red" style="margin-top:8px"><strong>Atención:</strong> Novillo Pasto y Vaca muestran margen negativo sobre el set integrado (~978 y ~1997 USD/Tn respectivamente). Solo Angus y Sapphire son rentables por spread.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub-section" id="fEcon">
+    <div class="card"><h2>Resultados económicos mensuales – Friar / Nelson</h2>
+      <table><thead><tr><th>Mes</th><th class="num">Faena</th><th class="num">Aptos</th><th class="num">%</th><th class="num">Kg Prod.</th><th class="num">Ingreso USD</th><th class="num">Costos USD</th><th class="num">Resultado USD</th></tr></thead><tbody id="eB"></tbody></table>
+    </div>
+  </div>
+
+  <div class="sub-section" id="fPrec">
+    <div class="card"><h2>Estructura de precios completa (28-ene-2026)</h2>
+      <table><tr><th>Categoría</th><th class="num">Integración</th><th class="num">BL+Service</th><th class="num">Compra</th><th class="num">Venta</th><th class="num">Spread</th></tr>
+        <tr><td>Novillo Pasto (Grass Fed)</td><td class="num">$8.737</td><td class="num">$1.500</td><td class="num">$9.700</td><td class="num">$10.000</td><td class="num" style="color:var(--warn)">-$963</td></tr>
+        <tr><td>Novillo Grano (Feedlot)</td><td class="num">$9.715</td><td class="num">$1.500</td><td class="num">$10.700</td><td class="num">$11.000</td><td class="num" style="color:var(--warn)">-$1.215</td></tr>
+        <tr><td>Vaca (Grass Fed Cows)</td><td class="num">$7.718</td><td class="num">$1.500</td><td class="num">$8.700</td><td class="num">$9.000</td><td class="num" style="color:var(--warn)">-$1.218</td></tr>
+        <tr><td>Angus (Feedlot)</td><td class="num">$10.514</td><td class="num">$1.500</td><td class="num">$11.500</td><td class="num">$11.800</td><td class="num" style="color:var(--accent2)">+$814</td></tr>
+        <tr><td>Sapphire (Feedlot)</td><td class="num">$12.400</td><td class="num">$1.500</td><td class="num">$13.500</td><td class="num">$13.900</td><td class="num" style="color:var(--accent2)">+$400</td></tr>
+      </table><div class="note">BL fee: USD 300 + Friar Service: USD 1.200 = USD 1.500. Precios en USD/Tn.</div></div>
+    <div class="card"><h2>Precios de compra por usuario</h2><table><tr><th>Usuario</th><th>Vigente desde</th><th class="num">Isla</th><th class="num">Pasto B</th><th class="num">Grano</th><th class="num">Angus</th><th class="num">Zafiro</th></tr><tr><td><strong>Abuelo Julio</strong></td><td>28/01/2026</td><td class="num">8.700</td><td class="num">9.700</td><td class="num">10.700</td><td class="num">11.500</td><td class="num">13.500</td></tr><tr><td><strong>Hereford</strong></td><td>08/02/2026</td><td class="num">8.700</td><td class="num">9.700</td><td class="num">10.700</td><td class="num">11.300</td><td class="num">13.500</td></tr></table></div>
+  </div>
+
+  <div class="sub-section" id="fProg"><div class="card"><h2>Programación de faena</h2><p style="color:var(--text3);font-size:12px">Sección en construcción. Próximamente: grilla semanal de proveedores/usuarios con cabezas programadas por día.</p></div></div>
+</section>
+
+<!-- ══════ CARCARAÑÁ ══════ -->
+<section id="carca">
+  <div class="sub-nav" id="cSN"><a href="#" data-sub="cInfo" class="active">Información</a><a href="#" data-sub="cEcon">Resultado Económico (Mattievich)</a></div>
+  <div class="sub-section active" id="cInfo">
+    <div class="empty-state"><div class="emoji">🏭</div><p><strong>Carcarañá / Lequio SA</strong> — Datos pendientes</p><p style="margin-top:8px;font-size:11px">Responsable: Adrián Mosqueira · Ubicación: Carcarañá, Santa Fe</p></div>
+  </div>
+  <div class="sub-section" id="cEcon">
+    <div class="card"><h2>Resultados económicos – Mattievich / Carcarañá</h2>
+      <table><thead><tr><th>Mes</th><th class="num">Faena</th><th class="num">Aptos</th><th class="num">%</th><th class="num">Kg Prod.</th><th class="num">Ingreso USD</th></tr></thead><tbody id="cEconBody"></tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ VILLA MERCEDES ══════ -->
+<section id="vm">
+  <div class="empty-state"><div class="emoji">🏗️</div><p><strong>Villa Mercedes / Minerva Foods</strong> — En ramp-up</p><p style="margin-top:8px;font-size:11px">Enero 2026: 1.962 cabezas · Responsables: G. Rapaporte / P. Martínez</p></div>
+</section>
+
+<!-- ══════ SANTA GIULIA ══════ -->
+<section id="sg">
+  <div class="empty-state"><div class="emoji">🏗️</div><p><strong>Santa Giulia</strong> — En ramp-up</p><p style="margin-top:8px;font-size:11px">Ene 2026: 4.078 cab. · Feb: 3.652 cab. · Alejandro Korn, Bs.As.</p><p style="font-size:11px">Responsables: G. Rapaporte / P. Martínez</p></div>
+</section>
+
+<!-- ══════ COPRA ══════ -->
+<section id="copra">
+  <div class="empty-state"><div class="emoji">🐄</div><p><strong>COPRA – Abuelo Julio</strong> — Datos pendientes</p><p style="margin-top:8px;font-size:11px">Compra y cría de hacienda para abastecimiento de Friar/Nelson</p></div>
+</section>
+
+<!-- ══════ PLANES DE NEGOCIO ══════ -->
+<section id="planes">
+  <div class="filter-bar"><label>Proyecto</label><select id="pSel"><option value="ameat">American Meat – Cacharí</option></select><span class="pill warn" style="margin-left:8px">En evaluación</span></div>
+  <div class="sub-nav" id="pSN"><a href="#" data-sub="pRes" class="active">Resumen</a><a href="#" data-sub="pEt">Etapas</a><a href="#" data-sub="pCx">CAPEX & Repago</a><a href="#" data-sub="pMx">Mix Productivo</a><a href="#" data-sub="pSm">Simulador</a><a href="#" data-sub="pRk">Riesgos</a></div>
+
+  <div class="sub-section active" id="pRes"><div class="kpi-row"><div class="kpi"><div class="label">Situación actual</div><div class="value" style="font-size:18px">80–100</div><div class="sub">cabezas/semana</div></div><div class="kpi"><div class="label">Etapa 1 (consumo)</div><div class="value" style="font-size:18px">400–500</div><div class="sub">cabezas/semana</div></div><div class="kpi green"><div class="label">Etapa 2 (export)</div><div class="value" style="font-size:18px">350–500</div><div class="sub">cabezas/día</div></div><div class="kpi red"><div class="label">CAPEX</div><div class="value">USD 3,5M</div><div class="sub">18 meses – curva S</div></div><div class="kpi"><div class="label">Resultado E1</div><div class="value">USD 94k/m</div><div class="sub">~4% margen</div></div><div class="kpi green"><div class="label">EBITDA E2</div><div class="value">USD 432k/m</div><div class="sub">~4,8% margen</div></div><div class="kpi warn"><div class="label">Repago total</div><div class="value">~Mes 38</div><div class="sub">compra+CAPEX+CT</div></div></div>
+  <div class="g2"><div class="card"><h2>Tesis de inversión</h2><p style="font-size:12px;color:var(--text2);line-height:1.6">Escalar de consumo interno a exportación kosher (Israel/EE.UU.) en planta propia en Cacharí, Partido de Azul, Buenos Aires.</p><div style="display:flex;gap:0;margin-top:14px;border-radius:8px;overflow:hidden"><div style="flex:1.5;padding:12px;background:var(--bg3);text-align:center"><div style="font-size:11px;font-weight:700">Etapa 1 (0–18m)</div><div style="font-size:9px;color:var(--text3)">Consumo + obra</div></div><div style="flex:1;padding:12px;background:rgba(59,130,246,.2);text-align:center"><div style="font-size:11px;font-weight:700">Ramp-up (19–30m)</div><div style="font-size:9px;color:var(--text3)">Export. progresiva</div></div><div style="flex:1;padding:12px;background:rgba(16,185,129,.2);text-align:center"><div style="font-size:11px;font-weight:700">Full (31m+)</div><div style="font-size:9px;color:var(--text3)">350–500 cab/día</div></div></div><div class="note">El repago depende de (i) rampa real de volúmenes, (ii) mix de cortes y (iii) tipo de cambio / regulación local.</div></div>
+  <div class="card"><h2>Valuación y CAPEX</h2><table><tr><td>EV planta</td><td class="num"><strong>USD 10,0 MM</strong></td></tr><tr><td>CAPEX</td><td class="num"><strong>USD 3,5 MM</strong></td></tr><tr class="hl"><td>Equity neto</td><td class="num">USD 6,5 MM</td></tr><tr class="hl"><td>50% acciones</td><td class="num">USD 3,25 MM</td></tr></table><div style="margin-top:10px;font-size:11px;color:var(--text3)"><strong>Estructura:</strong> (i) Compra equity + CAPEX · (ii) Deuda/MEZZ · (iii) Híbrido</div></div></div></div>
+
+  <div class="sub-section" id="pEt"><div class="g2"><div class="card"><h2>Etapa 1 – Operación consumo</h2><table><tr><td>Precio compra hacienda</td><td class="num">AR$ 4.750/kg pie</td></tr><tr><td>Rendimiento mínimo</td><td class="num">60%</td></tr><tr><td>Precio RES (60%)</td><td class="num">AR$ 7.917/kg</td></tr><tr><td>Costo faena</td><td class="num">AR$ 174/kg res</td></tr><tr><td>Recupero integrado</td><td class="num">AR$ 213/kg res</td></tr><tr><td>Res a salida de faena</td><td class="num">AR$ 7.877/kg</td></tr><tr class="hl"><td>Precio venta</td><td class="num">AR$ 8.700/kg</td></tr><tr class="hl"><td>Contribución neta</td><td class="num">AR$ 357/kg</td></tr><tr><td>Ganancia neta mensual</td><td class="num">AR$ 137 MM ≈ US$ 94k</td></tr><tr class="hl"><td>Punto de equilibrio</td><td class="num">906 cabezas/mes</td></tr></table></div>
+  <div class="card"><h2>Etapa 2 – Exportación Kosher</h2><table><tr><td>Capacidad base</td><td class="num">350 cab/día</td></tr><tr><td>Turnos</td><td class="num">1 faena + 2 desposte</td></tr><tr><td>Facturación base</td><td class="num">USD 9,0 MM/mes</td></tr><tr class="hl"><td>EBITDA (100%)</td><td class="num">USD 432k/mes</td></tr><tr><td>EBITDA ajust. (-10%)</td><td class="num">USD 388k/mes</td></tr><tr><td>Margen EBITDA</td><td class="num">4,8%</td></tr><tr><td>Costo logístico/expo</td><td class="num">US$ 0,65/kg</td></tr></table>
+  <h2 style="margin-top:14px">Escenarios E2</h2><table><tr><th>Escenario</th><th class="num">Días/mes</th><th class="num">EBITDA full</th><th class="num">Haircut</th><th class="num">EBITDA adj.</th></tr><tr><td>Optimista</td><td class="num">22</td><td class="num">452k</td><td class="num">×0,95</td><td class="num" style="color:var(--accent2)">429k</td></tr><tr><td>Base</td><td class="num">21</td><td class="num">432k</td><td class="num">×0,90</td><td class="num"><strong>388k</strong></td></tr><tr><td>Conservador</td><td class="num">17</td><td class="num">349k</td><td class="num">×0,85</td><td class="num" style="color:var(--warn)">297k</td></tr></table></div></div></div>
+
+  <div class="sub-section" id="pCx"><div class="g2"><div class="card"><h2>CAPEX por rubro (USD k)</h2><div class="chart-box sm"><canvas id="cCx"></canvas></div></div><div class="card"><h2>Detalle CAPEX</h2><table><tr><th>Rubro</th><th class="num">USD</th></tr><tr><td>Playa de faena</td><td class="num">915.000</td></tr><tr><td>Saladero</td><td class="num">685.000</td></tr><tr><td>Cámaras de maduración</td><td class="num">390.000</td></tr><tr><td>Sala de máquinas</td><td class="num">350.000</td></tr><tr><td>Corrales</td><td class="num">300.000</td></tr><tr><td>Menudencias</td><td class="num">265.000</td></tr><tr><td>Cámaras cuartos</td><td class="num">155.000</td></tr><tr><td>Vestuarios</td><td class="num">100.000</td></tr><tr><td>Ingeniería</td><td class="num">45.000</td></tr><tr class="hl"><td><strong>TOTAL</strong></td><td class="num"><strong>~3.500.000</strong></td></tr></table></div></div>
+  <div class="card"><h2>Repago estimado (flujo acumulado USD k)</h2><div class="chart-box"><canvas id="cRp"></canvas></div><div class="note"><strong>Modelo:</strong> CAPEX curva S 18m | E1 US$ 94k/m | E2 rampa 20→100% (m19–31+) | Haircut -10%</div></div></div>
+
+  <div class="sub-section" id="pMx"><div class="kpi-row"><div class="kpi"><div class="label">FOB ponderado</div><div class="value" style="font-size:16px">~US$ 9,59/kg</div><div class="sub">sobre ~110 kg exp./media res</div></div><div class="kpi green"><div class="label">Valor FOB / cabeza</div><div class="value" style="font-size:16px">~US$ 2.110</div><div class="sub">2 medias res</div></div></div>
+  <div class="g2"><div class="card"><h2>Mix productivo y precios FOB</h2><table id="mxT"><tr><th>Producto</th><th class="num">kg/mr</th><th class="num">Rend %</th><th class="num">FOB/Tn</th><th class="num">Valor USD</th></tr></table></div><div class="card"><h2>Composición del valor</h2><div class="chart-box"><canvas id="cMx"></canvas></div></div></div></div>
+
+  <div class="sub-section" id="pSm"><div class="card"><h2>Simulador de escenarios</h2><p style="font-size:12px;color:var(--text3);margin-bottom:14px">Modificá los parámetros y el modelo se recalcula en tiempo real.</p>
+  <div class="g3"><div><div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">ETAPA 1</div><div class="input-group"><label>Precio compra (AR$/kg pie)</label><input type="number" id="s_pc" value="4750" step="50"></div><div class="input-group"><label>Rendimiento faena (%)</label><input type="number" id="s_rd" value="60" step="0.5"></div><div class="input-group"><label>Precio venta (AR$/kg res)</label><input type="number" id="s_pv" value="8700" step="100"></div><div class="input-group"><label>Cabezas/mes</label><input type="number" id="s_cb" value="1600" step="100"></div><div class="input-group"><label>Tipo de cambio (AR$/USD)</label><input type="number" id="s_tc" value="1460" step="10"></div></div>
+  <div><div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:8px">ETAPA 2</div><div class="input-group"><label>EBITDA 100% (USD k)</label><input type="number" id="s_eb" value="431.5" step="10"></div><div class="input-group"><label>Haircut EBITDA (%)</label><input type="number" id="s_hc" value="10" step="1"></div><div class="input-group"><label>Días operativos/mes</label><input type="number" id="s_di" value="21" step="1"></div></div>
+  <div><div style="font-size:12px;font-weight:700;color:var(--warn);margin-bottom:8px">INVERSIÓN</div><div class="input-group"><label>CAPEX total (USD MM)</label><input type="number" id="s_cx" value="3.5" step="0.1"></div><div class="input-group"><label>Meses de obra</label><input type="number" id="s_ob" value="18" step="1"></div><div class="input-group"><label>Compra 50% equity (USD MM)</label><input type="number" id="s_eq" value="3.25" step="0.25"></div><div style="margin-top:16px"><button class="btn" onclick="runSim()">Recalcular</button> <button class="btn sec" onclick="resetSim()">Reset</button></div></div></div></div>
+  <div class="kpi-row"><div class="kpi"><div class="label">Contribución neta E1</div><div class="value" id="sr1">–</div><div class="sub">AR$/kg res</div></div><div class="kpi"><div class="label">Resultado E1</div><div class="value" id="sr2">–</div><div class="sub">USD/mes</div></div><div class="kpi green"><div class="label">EBITDA E2 ajust.</div><div class="value" id="sr3">–</div><div class="sub">USD/mes</div></div><div class="kpi warn"><div class="label">Repago operativo</div><div class="value" id="sr4">–</div><div class="sub">meses</div></div><div class="kpi red"><div class="label">Repago total</div><div class="value" id="sr5">–</div><div class="sub">meses</div></div></div>
+  <div class="card"><h2>Flujo de fondos simulado</h2><div class="chart-box"><canvas id="cSm"></canvas></div></div></div>
+
+  <div class="sub-section" id="pRk"><div class="card"><h2>Riesgos clave y mitigaciones</h2><table><tr><th style="width:25%">Riesgo</th><th style="width:12%">Impacto</th><th>Mitigación</th></tr><tr><td><strong>Obra/plazos (18 meses)</strong></td><td><span class="pill red">Alto</span></td><td>Contrato por hitos + control de alcance + contingencias presupuestarias</td></tr><tr><td><strong>Mix/precios FOB</strong></td><td><span class="pill red">Alto</span></td><td>Diversificación de destinos, contratos forward, sensibilidad de precios</td></tr><tr><td><strong>Operación</strong></td><td><span class="pill blue">Medio</span></td><td>Métricas por turno, capacitación continua, mantenimiento planificado</td></tr><tr><td><strong>Finanzas (cartera)</strong></td><td><span class="pill blue">Medio</span></td><td>Política de crédito, límites por cliente, seguro/cesión</td></tr><tr><td><strong>Regulatorio/ambiental</strong></td><td><span class="pill green">Bajo</span></td><td>Habilitaciones al día, efluentes, auditorías periódicas</td></tr></table></div></div>
+</section>
+</div>
+<div class="footer">HIGLA SRL · Panel de Control · Confidencial · <span id="fD"></span></div>
+
+<script>
+const W=[{l:"S6",s:"Israel 2025",d:"2025-02-03",f:1397,a:1020,p:73.0,pk:109428,pt:63598,rd:58.1,dd:5},{l:"S7",s:"Israel 2025",d:"2025-02-10",f:1277,a:959,p:75.1,pk:107977,pt:62394,rd:57.8,dd:5},{l:"S8",s:"Israel 2025",d:"2025-02-17",f:1069,a:780,p:73.0,pk:87289,pt:50429,rd:57.8,dd:5},{l:"S9",s:"Israel 2025",d:"2025-02-24",f:1086,a:795,p:73.2,pk:86590,pt:50101,rd:57.9,dd:4},{l:"S10",s:"Israel 2025",d:"2025-03-03",f:1022,a:800,p:78.3,pk:50534,pt:29828,rd:59.0,dd:3},{l:"S11",s:"Israel 2025",d:"2025-03-10",f:857,a:640,p:74.7,pk:82647,pt:51908,rd:62.8,dd:3},{l:"S12",s:"Israel 2025",d:"2025-03-17",f:1236,a:666,p:53.9,pk:79179,pt:46620,rd:58.9,dd:4},{l:"S13",s:"Israel 2025",d:"2025-03-24",f:1412,a:1020,p:72.2,pk:85599,pt:50578,rd:59.1,dd:4},{l:"S19E",s:"Eres 2025",d:"2025-05-05",f:703,a:225,p:32.0,pk:0,pt:0,rd:0,dd:2},{l:"S20E",s:"Eres 2025",d:"2025-05-12",f:1544,a:547,p:35.4,pk:121747,pt:70216,rd:57.7,dd:5},{l:"S21E",s:"Eres 2025",d:"2025-05-19",f:1528,a:528,p:34.6,pk:112592,pt:62640,rd:55.6,dd:5},{l:"S22E",s:"Eres 2025",d:"2025-05-26",f:521,a:185,p:35.5,pk:96815,pt:55866,rd:57.7,dd:2},{l:"S24",s:"Canada/USA 2025",d:"2025-06-09",f:1036,a:449,p:43.3,pk:29101,pt:17121,rd:58.8,dd:3},{l:"S25",s:"Canada/USA 2025",d:"2025-06-16",f:817,a:303,p:37.1,pk:79059,pt:46013,rd:58.2,dd:3},{l:"S26",s:"Canada/USA 2025",d:"2025-06-23",f:1425,a:593,p:41.6,pk:59991,pt:34835,rd:58.1,dd:5},{l:"S27",s:"Canada/USA 2025",d:"2025-06-30",f:1564,a:682,p:43.6,pk:130537,pt:76159,rd:58.3,dd:5},{l:"S28",s:"Canada/USA 2025",d:"2025-07-07",f:1340,a:523,p:39.0,pk:111012,pt:65743,rd:59.2,dd:4},{l:"S29",s:"Canada/USA 2025",d:"2025-07-14",f:1438,a:501,p:34.8,pk:123106,pt:72567,rd:58.9,dd:5},{l:"S30",s:"Canada/USA 2025",d:"2025-07-21",f:1433,a:474,p:33.1,pk:95027,pt:56133,rd:59.1,dd:5},{l:"S31",s:"Canada/USA 2025",d:"2025-07-28",f:1392,a:505,p:36.3,pk:99925,pt:57934,rd:58.0,dd:5},{l:"S32",s:"Canada/USA 2025",d:"2025-08-04",f:1281,a:496,p:38.7,pk:104559,pt:60560,rd:57.9,dd:5},{l:"S33",s:"Canada/USA 2025",d:"2025-08-11",f:1694,a:630,p:37.2,pk:105428,pt:59745,rd:56.7,dd:5},{l:"S34",s:"Canada/USA 2025",d:"2025-08-18",f:1543,a:556,p:36.0,pk:121018,pt:69118,rd:57.1,dd:5},{l:"S35",s:"Canada/USA 2025",d:"2025-08-25",f:1685,a:559,p:33.2,pk:114522,pt:66063,rd:57.7,dd:5},{l:"S36",s:"Canada/USA 2025",d:"2025-09-01",f:1548,a:583,p:37.7,pk:124662,pt:71264,rd:57.2,dd:5},{l:"S37",s:"Canada/USA 2025",d:"2025-09-08",f:1513,a:188,p:12.4,pk:107458,pt:61337,rd:57.1,dd:5},{l:"S38",s:"Canada/USA 2025",d:"2025-09-15",f:1590,a:0,p:0.0,pk:128395,pt:73395,rd:57.2,dd:5},{l:"S43",s:"USA 2025-26",d:"2025-10-20",f:1373,a:996,p:72.5,pk:51032,pt:29571,rd:57.9,dd:4},{l:"S44",s:"USA 2025-26",d:"2025-10-27",f:1584,a:1170,p:73.9,pk:119997,pt:68460,rd:57.1,dd:5},{l:"S45",s:"USA 2025-26",d:"2025-11-03",f:1845,a:1395,p:75.6,pk:137676,pt:80121,rd:58.2,dd:5},{l:"S46",s:"USA 2025-26",d:"2025-11-10",f:1701,a:1241,p:73.0,pk:146618,pt:83888,rd:57.2,dd:5},{l:"S47",s:"USA 2025-26",d:"2025-11-17",f:1629,a:1185,p:72.7,pk:112676,pt:64739,rd:57.5,dd:5},{l:"S48",s:"USA 2025-26",d:"2025-11-24",f:1383,a:1040,p:75.2,pk:107123,pt:64383,rd:60.1,dd:4},{l:"S49",s:"USA 2025-26",d:"2025-12-01",f:1669,a:1236,p:74.1,pk:122935,pt:74326,rd:60.5,dd:5},{l:"S50",s:"USA 2025-26",d:"2025-12-08",f:1409,a:1087,p:77.1,pk:108114,pt:65497,rd:60.6,dd:4},{l:"S51",s:"USA 2025-26",d:"2025-12-15",f:1873,a:1420,p:75.8,pk:142256,pt:87445,rd:61.5,dd:5},{l:"S52",s:"USA 2025-26",d:"2025-12-22",f:1359,a:1047,p:77.0,pk:115982,pt:70800,rd:61.0,dd:4},{l:"S01",s:"USA 2025-26",d:"2025-12-29",f:1164,a:881,p:75.7,pk:97574,pt:59633,rd:61.1,dd:4},{l:"S02",s:"USA 2025-26",d:"2026-01-05",f:1779,a:1326,p:74.5,pk:120781,pt:72740,rd:60.2,dd:5},{l:"S03",s:"USA 2025-26",d:"2026-01-12",f:1799,a:1326,p:73.7,pk:135282,pt:82919,rd:61.3,dd:5},{l:"S04",s:"USA 2025-26",d:"2026-01-19",f:1745,a:1129,p:64.7,pk:124420,pt:76533,rd:61.5,dd:5},{l:"S05",s:"USA 2025-26",d:"2026-01-26",f:1730,a:1144,p:66.1,pk:115091,pt:70477,rd:61.2,dd:5},{l:"S06",s:"USA 2025-26",d:"2026-02-02",f:1724,a:1235,p:71.6,pk:132074,pt:80658,rd:61.1,dd:5},{l:"S07",s:"USA 2025-26",d:"2026-02-09",f:1796,a:1344,p:74.8,pk:135291,pt:82240,rd:60.8,dd:5},{l:"S08",s:"USA 2025-26",d:"2026-02-16",f:688,a:491,p:71.4,pk:71906,pt:43249,rd:60.1,dd:3},{l:"S09",s:"USA 2025-26",d:"2026-02-23",f:1403,a:1006,p:71.7,pk:104534,pt:63193,rd:60.5,dd:5},{l:"S10",s:"USA 2025-26",d:"2026-03-02",f:1408,a:975,p:69.2,pk:82236,pt:48600,rd:59.1,dd:4},{l:"S11",s:"USA 2025-26",d:"2026-03-09",f:1590,a:1034,p:65.0,pk:88864,pt:53427,rd:60.1,dd:5}];
+const EC=[{m:"Jul 2025",pl:"Friar+Matt",f:11652,a:7942,pc:68.2,kg:547195,ig:122584,co:42695,rs:79889},{m:"Ago 2025",pl:"Friar+Matt",f:10761,a:7120,pc:66.2,kg:461182,ig:102359,co:39115,rs:63244},{m:"Sep 2025",pl:"Friar",f:4651,a:3261,pc:70.1,kg:226902,ig:68071,co:35075,rs:40721},{m:"Oct 2025",pl:"Friar+Matt",f:3739,a:2599,pc:69.5,kg:114350,ig:32267,co:22398,rs:9868},{m:"Nov 2025",pl:"Friar+Matt",f:12465,a:8664,pc:69.5,kg:551203,ig:117411,co:38247,rs:79164},{m:"Dic 2025",pl:"Friar+Matt",f:13420,a:9521,pc:71.0,kg:595231,ig:131965,co:42204,rs:89761},{m:"Ene 2026",pl:"Friar+Matt+VM+SG",f:19411,a:11984,pc:61.7,kg:768641,ig:144751,co:40704,rs:104047},{m:"Feb 2026",pl:"Friar+Matt+SG",f:13105,a:8334,pc:63.6,kg:576763,ig:114911,co:37195,rs:77716},{m:"Mar 2026",pl:"Friar",f:2998,a:2009,pc:67.0,kg:102027,ig:30608,co:25483,rs:6400}];
+const EDF=[{m:"Jul 25",f:6651,a:4471,pc:67.2,kg:319362,ig:95808,co:42695,rs:79889},{m:"Ago 25",f:6382,a:4185,pc:65.6,kg:264661,ig:79398,co:39115,rs:63244},{m:"Sep 25",f:4651,a:3261,pc:70.1,kg:226902,ig:68071,co:35075,rs:40721},{m:"Oct 25",f:2957,a:2166,pc:73.2,kg:98032,ig:29409,co:22398,rs:9868},{m:"Nov 25",f:6558,a:4861,pc:74.1,kg:293131,ig:87939,co:38247,rs:79164},{m:"Dic 25",f:7311,a:5536,pc:75.7,kg:340905,ig:102272,co:42204,rs:89761},{m:"Ene 26",f:7216,a:5060,pc:70.1,kg:319466,ig:95840,co:40704,rs:104047},{m:"Feb 26",f:5611,a:4076,pc:72.6,kg:269340,ig:80802,co:37195,rs:77716},{m:"Mar 26",f:2998,a:2009,pc:67.0,kg:102027,ig:30608,co:25483,rs:6400}];
+const EDM=[{m:"Jul 25",f:5001,a:3471,pc:69.4,kg:227834,ig:22783},{m:"Ago 25",f:4379,a:2935,pc:67.0,kg:196521,ig:19652},{m:"Oct 25",f:782,a:433,pc:55.4,kg:16318,ig:1632},{m:"Nov 25",f:5907,a:3803,pc:64.4,kg:258072,ig:25807},{m:"Dic 25",f:6109,a:3985,pc:65.2,kg:254326,ig:25433},{m:"Ene 26",f:6155,a:4154,pc:67.5,kg:290734,ig:29073},{m:"Feb 26",f:3842,a:2437,pc:63.4,kg:202860,ig:20286}];
+const MX=[{p:'Set Kosher cuarto del.',kg:36,r:'25,7%',fob:12000},{p:'R&L (incl. Picanha)',kg:12,r:'8,6%',fob:20000},{p:'Lomo',kg:2,r:'1,4%',fob:26000},{p:'Cuadril',kg:2.5,r:'1,8%',fob:14000},{p:'Bife Angosto',kg:4.5,r:'3,2%',fob:20000},{p:'Bife Ancho',kg:4,r:'2,9%',fob:22000},{p:'Picanha',kg:1.5,r:'1,1%',fob:16000},{p:'Colita Cuadril',kg:1,r:'0,7%',fob:13000},{p:'Cortes rueda',kg:15,r:'10,7%',fob:7000},{p:'Cortes cuarto del.',kg:33,r:'23,6%',fob:6500},{p:'Recortes Magros',kg:4,r:'2,9%',fob:5100},{p:'Recortes grasos',kg:10,r:'7,1%',fob:4300},{p:'Huesos',kg:32,r:'22,9%',fob:800},{p:'Grasa',kg:16,r:'11,4%',fob:2500},{p:'Decomiso',kg:4,r:'2,9%',fob:0}];
+
+document.querySelectorAll('.nav a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.nav a').forEach(n=>n.classList.remove('active'));document.querySelectorAll('.container>section').forEach(s=>s.classList.remove('active'));a.classList.add('active');document.getElementById(a.dataset.tab).classList.add('active')})});
+function initSN(id){document.querySelectorAll('#'+id+' a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('#'+id+' a').forEach(n=>n.classList.remove('active'));a.classList.add('active');a.closest('section').querySelectorAll('.sub-section').forEach(s=>s.classList.remove('active'));document.getElementById(a.dataset.sub).classList.add('active')})})}
+initSN('fSN');initSN('pSN');initSN('cSN');
+const now=new Date();document.getElementById('dateDisp').textContent=now.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});document.getElementById('fD').textContent=now.toLocaleDateString('es-AR');
+Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=10;Chart.defaults.color='#9CA3AF';Chart.defaults.plugins.legend.labels.usePointStyle=true;Chart.defaults.plugins.legend.labels.pointStyleWidth=8;
+const G='rgba(55,65,81,.5)';const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?Math.round(n/1e3).toLocaleString('es-AR')+'k':n.toLocaleString('es-AR');const fN=n=>n.toLocaleString('es-AR');const fTn=n=>{const t=Math.round(n/1000);return t.toLocaleString('es-AR')};
+const pctColor=v=>v>=70?'var(--accent2)':v>=50?'var(--accent3)':'var(--warn)';
+
+// HOME
+function updateHome(){
+  const s=document.getElementById('hSF').value;const m=document.getElementById('hMF').value;
+  let wf=s==='all'?W:W.filter(w=>w.s===s);
+  if(m!=='all'){const mMap={Oct:'10',Nov:'11',Dic:'12',Ene:'01',Feb:'02',Mar:'03'};const mc=mMap[m];
+    wf=wf.filter(w=>{const wm=w.d.substring(5,7);return wm===mc})}
+  const tF=wf.reduce((a,w)=>a+w.f,0),tA=wf.reduce((a,w)=>a+w.a,0),tPT=wf.reduce((a,w)=>a+w.pt,0);const pct=tF>0?(tA/tF*100).toFixed(1):0;
+  document.getElementById('h_f').textContent=fN(tF);
+  document.getElementById('h_a').innerHTML=fN(tA)+' <span style="font-size:14px;color:var(--accent2)">('+pct+'%)</span>';
+  document.getElementById('h_as').textContent='% sobre faena';
+  document.getElementById('h_pt').textContent=fTn(tPT)+' Tns';
+  const fr=EDF.reduce((a,e)=>a+e.rs,0);document.getElementById('h_r').textContent='$'+fmt(fr)}
+updateHome();
+const hm=EC.map(e=>e.m.replace(' 2025',' 25').replace(' 2026',' 26'));
+new Chart(document.getElementById('chHR'),{type:'bar',data:{labels:hm,datasets:[{label:'Resultado USD',data:EC.map(e=>e.rs),backgroundColor:EC.map(e=>e.rs>50000?'#10B981':e.rs>0?'#3B82F6':'#EF4444'),borderRadius:4,barThickness:24}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:G},ticks:{callback:v=>'$'+fmt(v)}},x:{grid:{display:false}}}}});
+new Chart(document.getElementById('chHF'),{type:'line',data:{labels:W.map(w=>w.l+'('+w.d.substring(2,4)+')'),datasets:[{label:'Faena',data:W.map(w=>w.f),borderColor:'#3B82F6',borderWidth:1.5,fill:false,tension:.2,pointRadius:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:G}},x:{grid:{display:false},ticks:{maxRotation:45,autoSkip:true,maxTicksLimit:20}}}}});
+// Cierres with plant filters
+const ECD_ALL=[
+{m:"Jul 2025",tags:["Friar"],f:6651,a:4471,kg:319362,ig:95808,co:42695,rs:79889},
+{m:"Jul 2025",tags:["Matt"],f:5001,a:3471,kg:227834,ig:22783,co:0,rs:0},
+{m:"Ago 2025",tags:["Friar"],f:6382,a:4185,kg:264661,ig:79398,co:39115,rs:63244},
+{m:"Ago 2025",tags:["Matt"],f:4379,a:2935,kg:196521,ig:19652,co:0,rs:0},
+{m:"Sep 2025",tags:["Friar"],f:4651,a:3261,kg:226902,ig:68071,co:35075,rs:40721},
+{m:"Oct 2025",tags:["Friar"],f:2957,a:2166,kg:98032,ig:29409,co:22398,rs:9868},
+{m:"Oct 2025",tags:["Matt"],f:782,a:433,kg:16318,ig:1632,co:0,rs:0},
+{m:"Nov 2025",tags:["Friar"],f:6558,a:4861,kg:293131,ig:87939,co:38247,rs:79164},
+{m:"Nov 2025",tags:["Matt"],f:5907,a:3803,kg:258072,ig:25807,co:0,rs:0},
+{m:"Dic 2025",tags:["Friar"],f:7311,a:5536,kg:340905,ig:102272,co:42204,rs:89761},
+{m:"Dic 2025",tags:["Matt"],f:6109,a:3985,kg:254326,ig:25433,co:0,rs:0},
+{m:"Ene 2026",tags:["Friar"],f:7216,a:5060,kg:319466,ig:95840,co:40704,rs:104047},
+{m:"Ene 2026",tags:["Matt"],f:6155,a:4154,kg:290734,ig:29073,co:0,rs:0},
+{m:"Ene 2026",tags:["VM"],f:1962,a:972,kg:48550,ig:4855,co:0,rs:0},
+{m:"Ene 2026",tags:["SG"],f:4078,a:1798,kg:109891,ig:10989,co:0,rs:0},
+{m:"Feb 2026",tags:["Friar"],f:5611,a:4076,kg:269340,ig:80802,co:37195,rs:77716},
+{m:"Feb 2026",tags:["Matt"],f:3842,a:2437,kg:202860,ig:20286,co:0,rs:0},
+{m:"Feb 2026",tags:["SG"],f:3652,a:1821,kg:104563,ig:10456,co:0,rs:0},
+{m:"Mar 2026",tags:["Friar"],f:2998,a:2009,kg:102027,ig:30608,co:25483,rs:6400}
+];
+function renderCierres(){
+  const checks=document.querySelectorAll('.plCheck');const active=[];checks.forEach(c=>{if(c.checked)active.push(c.value)});
+  // Group by month
+  const months=[...new Set(ECD_ALL.map(e=>e.m))];
+  const hB=document.getElementById('hCB');hB.innerHTML='';
+  let t1=0,t2=0,t3=0,t4=0,t5=0,t6=0;
+  months.forEach(m=>{
+    const rows=ECD_ALL.filter(e=>e.m===m&&e.tags.some(t=>active.includes(t)));
+    if(rows.length===0)return;
+    const f=rows.reduce((s,r)=>s+r.f,0),a=rows.reduce((s,r)=>s+r.a,0),kg=rows.reduce((s,r)=>s+r.kg,0),ig=rows.reduce((s,r)=>s+r.ig,0),co=rows.reduce((s,r)=>s+r.co,0),rs=rows.reduce((s,r)=>s+r.rs,0);
+    const pls=rows.map(r=>r.tags[0]).join('+');const pc=f>0?(a/f*100).toFixed(1):0;
+    t1+=f;t2+=a;t3+=kg;t4+=ig;t5+=co;t6+=rs;
+    const tr=document.createElement('tr');tr.innerHTML=`<td>${m}</td><td><span style="font-size:10px;color:var(--text3)">${pls}</span></td><td class="num">${fN(f)}</td><td class="num">${fN(a)}</td><td class="num">${pc}%</td><td class="num">${fN(kg)}</td><td class="num">${fN(ig)}</td><td class="num">${fN(co)}</td><td class="num" style="color:${rs>0?'var(--accent2)':'var(--text3)'}"><strong>${fN(rs)}</strong></td>`;
+    hB.appendChild(tr)});
+  const rT=document.createElement('tr');rT.className='hl';rT.innerHTML=`<td colspan="2"><strong>TOTAL</strong></td><td class="num"><strong>${fN(t1)}</strong></td><td class="num"><strong>${fN(t2)}</strong></td><td class="num"><strong>${t1>0?(t2/t1*100).toFixed(1):0}%</strong></td><td class="num"><strong>${fN(t3)}</strong></td><td class="num"><strong>${fN(t4)}</strong></td><td class="num"><strong>${fN(t5)}</strong></td><td class="num"><strong>${fN(t6)}</strong></td>`;
+  hB.appendChild(rT);
+}
+renderCierres();
+
+// NELSON
+let cFA,cPT2,cRd;
+function updateFriar(){
+  const s=document.getElementById('fSF').value;const fl=s==='all'?W:W.filter(w=>w.s===s);
+  const tF=fl.reduce((a,w)=>a+w.f,0),tA=fl.reduce((a,w)=>a+w.a,0),tPK=fl.reduce((a,w)=>a+w.pk,0),tPT=fl.reduce((a,w)=>a+w.pt,0),tD=fl.reduce((a,w)=>a+w.dd,0);
+  const pct=tF>0?(tA/tF*100).toFixed(1):0;
+  document.getElementById('ff').textContent=fN(tF);document.getElementById('ffs').textContent=fl.length+' sem · '+tD+' días';
+  document.getElementById('fa').innerHTML=fN(tA)+' <span style="font-size:12px;color:var(--accent2)">('+pct+'%)</span>';document.getElementById('fas').textContent='aptitud total';
+  document.getElementById('fcd').textContent=tD>0?Math.round(tF/tD):'–';
+  document.getElementById('fpt').textContent=fTn(tPT)+' Tns';
+  document.getElementById('frd').textContent=tPK>0?(tPT/tPK*100).toFixed(1)+'%':'–';
+  document.getElementById('fsem').textContent=fl.length;
+  const lb=fl.map(w=>w.l);
+
+  // Combined faena + aptitud chart
+  if(cFA)cFA.destroy();
+  cFA=new Chart(document.getElementById('cFaApt'),{type:'bar',data:{labels:lb,datasets:[
+    {label:'Faena',data:fl.map(w=>w.f),backgroundColor:'rgba(59,130,246,.35)',borderColor:'#3B82F6',borderWidth:1,borderRadius:3,order:2,yAxisID:'y'},
+    {label:'Aptos',data:fl.map(w=>w.a),backgroundColor:'rgba(16,185,129,.5)',borderColor:'#10B981',borderWidth:1,borderRadius:3,order:1,yAxisID:'y'},
+    {label:'% Apt.',data:fl.map(w=>w.p),type:'line',borderColor:'#F59E0B',backgroundColor:'rgba(245,158,11,.1)',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#F59E0B',fill:false,yAxisID:'y1',order:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,grid:{color:G},position:'left'},y1:{position:'right',min:0,max:100,grid:{display:false},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+
+  // PT chart
+  const fp=fl.filter(w=>w.pt>0);
+  if(cPT2)cPT2.destroy();
+  cPT2=new Chart(document.getElementById('cPT'),{type:'bar',data:{labels:fp.map(w=>w.l),datasets:[
+    {label:'Pechos kg',data:fp.map(w=>w.pk),backgroundColor:'rgba(245,158,11,.25)',borderColor:'#F59E0B',borderWidth:1,borderRadius:2,yAxisID:'y'},
+    {label:'PT kg',data:fp.map(w=>w.pt),backgroundColor:'rgba(59,130,246,.4)',borderColor:'#3B82F6',borderWidth:1,borderRadius:2,yAxisID:'y'},
+    {label:'Rinde%',data:fp.map(w=>w.rd),type:'line',borderColor:'#EF4444',borderWidth:2,pointRadius:2,yAxisID:'y1',fill:false}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true,grid:{color:G},ticks:{callback:v=>fmt(v)}},y1:{position:'right',min:50,max:70,grid:{display:false},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+
+  if(cRd)cRd.destroy();
+  cRd=new Chart(document.getElementById('cRd'),{type:'line',data:{labels:fp.map(w=>w.l),datasets:[{label:'Rinde %',data:fp.map(w=>w.rd),borderColor:'#3B82F6',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,fill:true,tension:.3,pointRadius:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:50,max:70,grid:{color:G},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+
+  // Detail table
+  const db=document.getElementById('detBody');db.innerHTML='';
+  let dtF=0,dtA=0,dtPK=0,dtPT=0,dtD=0;
+  fl.forEach(w=>{dtF+=w.f;dtA+=w.a;dtPK+=w.pk;dtPT+=w.pt;dtD+=w.dd;
+    const dt=w.d.split('-');const dStr=dt[2]+'/'+dt[1]+'/'+dt[0].substring(2);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>Semana ${w.l.replace('S','').replace('E','')}</strong></td><td>${dStr}</td><td class="num">${w.dd}</td><td class="num">${fN(w.f)}</td><td class="num">${fN(w.a)}</td><td class="num" style="color:${pctColor(w.p)}">${w.p}%</td><td class="num">${fN(w.pk)}</td><td class="num">${fN(w.pt)}</td><td class="num">${w.rd>0?w.rd+'%':'–'}</td>`;
+    db.appendChild(tr)});
+  const ttr=document.createElement('tr');ttr.className='hl';const dtPct=dtF>0?(dtA/dtF*100).toFixed(1):0;const dtRd=dtPK>0?(dtPT/dtPK*100).toFixed(1):0;
+  ttr.innerHTML=`<td colspan="2"><strong>TOTAL</strong></td><td class="num"><strong>${dtD}</strong></td><td class="num"><strong>${fN(dtF)}</strong></td><td class="num"><strong>${fN(dtA)}</strong></td><td class="num"><strong>${dtPct}%</strong></td><td class="num"><strong>${fN(dtPK)}</strong></td><td class="num"><strong>${fN(dtPT)}</strong></td><td class="num"><strong>${dtRd}%</strong></td>`;
+  db.appendChild(ttr);
+}
+updateFriar();
+
+// Econ - only Friar
+function updateEcon(){
+  const b=document.getElementById('eB');b.innerHTML='';let ti=0,tc=0,tr2=0;
+  EDF.forEach(e=>{ti+=e.ig;tc+=e.co;tr2+=e.rs;
+    const r=document.createElement('tr');
+    r.innerHTML=`<td>${e.m}</td><td class="num">${fN(e.f)}</td><td class="num">${fN(e.a)}</td><td class="num">${e.pc}%</td><td class="num">${fmt(e.kg)}</td><td class="num">${fN(e.ig)}</td><td class="num">${fN(e.co)}</td><td class="num" style="color:${e.rs>0?'var(--accent2)':'var(--text3)'}"><strong>${fN(e.rs)}</strong></td>`;
+    b.appendChild(r)});
+  const t=document.createElement('tr');t.className='hl';
+  t.innerHTML=`<td><strong>TOTAL</strong></td><td></td><td></td><td></td><td></td><td class="num"><strong>${fN(ti)}</strong></td><td class="num"><strong>${fN(tc)}</strong></td><td class="num"><strong>${fN(tr2)}</strong></td>`;
+  b.appendChild(t);
+}
+updateEcon();
+
+// Carcarañá Mattievich
+const cEB=document.getElementById('cEconBody');let cti=0;
+EDM.forEach(e=>{cti+=e.ig;const r=document.createElement('tr');r.innerHTML=`<td>${e.m}</td><td class="num">${fN(e.f)}</td><td class="num">${fN(e.a)}</td><td class="num">${e.pc}%</td><td class="num">${fmt(e.kg)}</td><td class="num">${fN(e.ig)}</td>`;cEB.appendChild(r)});
+const cTr=document.createElement('tr');cTr.className='hl';cTr.innerHTML=`<td colspan="5"><strong>TOTAL</strong></td><td class="num"><strong>${fN(cti)}</strong></td>`;cEB.appendChild(cTr);
+
+// PLANES CHARTS
+new Chart(document.getElementById('cCx'),{type:'bar',data:{labels:['Faena','Saladero','Cám.mad.','Máquinas','Corrales','Menud.','Cám.cuartos','Vestuarios','Ing.'],datasets:[{data:[915,685,390,350,300,265,155,100,45],backgroundColor:'#3B82F6',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:G},ticks:{callback:v=>'$'+v+'k'}},y:{grid:{display:false}}}}});
+function bCF(cx,mo,e1,eb,hc,eq){const cd=[{s:1,e:Math.ceil(mo*.17),p:.1},{s:Math.ceil(mo*.17)+1,e:Math.ceil(mo*.5),p:.3},{s:Math.ceil(mo*.5)+1,e:Math.ceil(mo*.83),p:.4},{s:Math.ceil(mo*.83)+1,e:mo,p:.2}];const ea=eb*(1-hc/100);const rm=[{s:mo+1,e:mo+3,p:.2},{s:mo+4,e:mo+6,p:.4},{s:mo+7,e:mo+9,p:.6},{s:mo+10,e:mo+12,p:.8},{s:mo+13,e:60,p:1}];let ms=[],nA=[],ao=[],at=[];let co=0,ct=-eq*1e6;for(let i=1;i<=48;i++){let x=0;cd.forEach(d=>{if(i>=d.s&&i<=d.e)x=cx*1e6*d.p/(d.e-d.s+1)});let v=0;if(i<=mo)v=e1;else rm.forEach(r=>{if(i>=r.s&&i<=r.e)v=ea*r.p});let n=v-x;co+=n;ct+=n;ms.push(i);nA.push(Math.round(n/1e3));ao.push(Math.round(co/1e3));at.push(Math.round(ct/1e3))}let ro=null,rt=null;ao.forEach((v,i)=>{if(v>0&&!ro)ro=i+1});at.forEach((v,i)=>{if(v>0&&!rt)rt=i+1});return{ms,nA,ao,at,ro,rt}}
+const df=bCF(3.5,18,93862,431500,10,3.25);
+new Chart(document.getElementById('cRp'),{type:'line',data:{labels:df.ms.filter((_,i)=>i%2===0).map(m=>'M'+m),datasets:[{label:'Flujo neto',data:df.nA.filter((_,i)=>i%2===0),borderColor:'#3B82F6',borderWidth:1.5,fill:false,pointRadius:1},{label:'Acum. operativo',data:df.ao.filter((_,i)=>i%2===0),borderColor:'#10B981',borderWidth:2.5,fill:false,pointRadius:1},{label:'Acum. total',data:df.at.filter((_,i)=>i%2===0),borderColor:'#EF4444',borderWidth:2,borderDash:[5,3],fill:false,pointRadius:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:G}},x:{grid:{display:false}}}}});
+const mt=document.getElementById('mxT');let tv=0;MX.forEach(r=>{const v=(r.kg*r.fob/1000).toFixed(1);tv+=r.kg*r.fob/1000;const t=document.createElement('tr');t.innerHTML=`<td>${r.p}</td><td class="num">${r.kg}</td><td class="num">${r.r}</td><td class="num">${r.fob.toLocaleString()}</td><td class="num"><strong>$${v}</strong></td>`;mt.appendChild(t)});const mT=document.createElement('tr');mT.className='hl';mT.innerHTML=`<td><strong>TOTAL (media res)</strong></td><td></td><td></td><td></td><td class="num"><strong>$${tv.toFixed(1)}</strong></td>`;mt.appendChild(mT);
+const tM=MX.filter(r=>r.fob>0).sort((a,b)=>(b.kg*b.fob)-(a.kg*a.fob)).slice(0,8);
+new Chart(document.getElementById('cMx'),{type:'doughnut',data:{labels:tM.map(r=>r.p),datasets:[{data:tM.map(r=>r.kg*r.fob/1000),backgroundColor:['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#EC4899','#6B7280']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}}}}});
+let sC=null;function runSim(){const pc=+document.getElementById('s_pc').value,rd=+document.getElementById('s_rd').value/100,pv=+document.getElementById('s_pv').value,cb=+document.getElementById('s_cb').value,tc=+document.getElementById('s_tc').value,eb=+document.getElementById('s_eb').value*1000,hc=+document.getElementById('s_hc').value,cx=+document.getElementById('s_cx').value,ob=+document.getElementById('s_ob').value,eq=+document.getElementById('s_eq').value;const pR=pc/rd,rF=pR+174-213,cmB=pv-rF,cmN=cmB-466,kR=cb*240,gA=cmN*kR,gU=gA/tc,eA=eb*(1-hc/100);document.getElementById('sr1').textContent=Math.round(cmN)+' AR$/kg';document.getElementById('sr2').textContent=(gU/1000).toFixed(1)+'k USD';document.getElementById('sr3').textContent=(eA/1000).toFixed(1)+'k USD';const cf=bCF(cx,ob,gU,eb,hc,eq);document.getElementById('sr4').textContent=cf.ro?'Mes '+cf.ro:'>48';document.getElementById('sr5').textContent=cf.rt?'Mes '+cf.rt:'>48';const lb=cf.ms.filter((_,i)=>i%2===0).map(m=>'M'+m);if(sC)sC.destroy();sC=new Chart(document.getElementById('cSm'),{type:'line',data:{labels:lb,datasets:[{label:'Acum. operativo',data:cf.ao.filter((_,i)=>i%2===0),borderColor:'#10B981',borderWidth:2.5,fill:false,pointRadius:1},{label:'Acum. total',data:cf.at.filter((_,i)=>i%2===0),borderColor:'#EF4444',borderWidth:2,borderDash:[5,3],fill:false,pointRadius:1},{label:'Flujo neto',data:cf.nA.filter((_,i)=>i%2===0),borderColor:'#3B82F6',borderWidth:1.5,fill:false,pointRadius:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:G}},x:{grid:{display:false}}}}})}
+function resetSim(){document.getElementById('s_pc').value=4750;document.getElementById('s_rd').value=60;document.getElementById('s_pv').value=8700;document.getElementById('s_cb').value=1600;document.getElementById('s_tc').value=1460;document.getElementById('s_eb').value=431.5;document.getElementById('s_hc').value=10;document.getElementById('s_cx').value=3.5;document.getElementById('s_ob').value=18;document.getElementById('s_eq').value=3.25;document.getElementById('s_di').value=21;runSim()}
+runSim();
+</script>
+</body>
+</html>
