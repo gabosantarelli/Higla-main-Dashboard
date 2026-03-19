@@ -122,7 +122,7 @@ let COSTOS_HIGLA={
 // ── Resultado consolidado mensual ───────────────────────────
 let RES_CONSOLIDADO={
 "Jul 2025":79889,"Ago 2025":63944,"Sep 2025":40721,"Oct 2025":9868,
-"Nov 2025":79164,"Dic 2025":89761,"Ene 2026":104047,"Feb 2026":77716,"Mar 2026":302
+"Nov 2025":79164,"Dic 2025":89761,"Ene 2026":104047,"Feb 2026":77716,"Mar 2026":7936
 };
 
 // ── Recupero de contenedores (USD, solo Friar) ──────────────
@@ -141,7 +141,7 @@ let EDF=[
 {m:"Dic 25",f:7311,a:5536,pc:75.7,kg:340905,ig:102272,co:42204,rs:89761},
 {m:"Ene 26",f:7216,a:5060,pc:70.1,kg:319466,ig:95840,co:40704,rs:104047},
 {m:"Feb 26",f:5611,a:4076,pc:72.6,kg:269340,ig:80802,co:37195,rs:77716},
-{m:"Mar 26",f:2998,a:2009,pc:67.0,kg:102027,ig:30608,co:22672,rs:302}
+{m:"Mar 26",f:2998,a:2009,pc:67.0,kg:102027,ig:30608,co:22672,rs:7936}
 ];
 
 // ── Mattievich/Carcarañá: resultados económicos mensuales ───
@@ -165,7 +165,7 @@ let EC=[
 {m:"Dic 2025",pl:"Friar+Matt",f:13420,a:9521,pc:71.0,kg:595231,ig:131965,co:42204,rs:89761},
 {m:"Ene 2026",pl:"Friar+Matt+VM+SG",f:19411,a:11984,pc:61.7,kg:768641,ig:144751,co:40704,rs:104047},
 {m:"Feb 2026",pl:"Friar+Matt+SG",f:13105,a:8334,pc:63.6,kg:576763,ig:114911,co:37195,rs:77716},
-{m:"Mar 2026",pl:"Friar",f:2998,a:2009,pc:67.0,kg:102027,ig:30608,co:22672,rs:302}
+{m:"Mar 2026",pl:"Friar",f:2998,a:2009,pc:67.0,kg:102027,ig:30608,co:22672,rs:7936}
 ];
 
 // ── Mix productivo American Meat ────────────────────────────
@@ -272,7 +272,7 @@ tr:hover td{background:rgba(59,130,246,.04)}tr.hl td{font-weight:700;color:var(-
     <div class="kpi"><div class="label">Faena acum. temporada</div><div class="value" id="h_f">–</div><div class="sub">cabezas totales</div></div>
     <div class="kpi green"><div class="label">Aptos acum.</div><div class="value" id="h_a">–</div><div class="sub" id="h_as">% sobre faena</div></div>
     <div class="kpi warn"><div class="label">Kg PT acum.</div><div class="value" id="h_pt">–</div><div class="sub">producto terminado</div></div>
-    <div class="kpi"><div class="label">Resultado acum.</div><div class="value" id="h_r">–</div><div class="sub">USD operativo (Friar)</div></div>
+    <div class="kpi"><div class="label">Resultado acum.</div><div class="value" id="h_r">–</div><div class="sub">USD operativo (consolidado)</div></div>
   </div>
   <div class="g2">
     <div class="card"><h2>Resultado operativo mensual (USD)</h2><div class="chart-box sm"><canvas id="chHR"></canvas></div></div>
@@ -307,7 +307,8 @@ tr:hover td{background:rgba(59,130,246,.04)}tr.hl td{font-weight:700;color:var(-
       <div class="kpi green"><div class="label">Aptos total</div><div class="value" id="fa">–</div><div class="sub" id="fas">–</div></div>
       <div class="kpi green"><div class="label">Cab/día prom.</div><div class="value" id="fcd">–</div><div class="sub">faena diaria</div></div>
       <div class="kpi"><div class="label">Kg PT acum.</div><div class="value" id="fpt">–</div><div class="sub">producto terminado</div></div>
-      <div class="kpi"><div class="label">Rinde desp. prom.</div><div class="value" id="frd">–</div><div class="sub">PT / pechos kg</div></div>
+      <div class="kpi"><div class="label">Rinde PT/pechos</div><div class="value" id="frd">–</div><div class="sub">PT / pechos kg</div></div>
+      <div class="kpi"><div class="label">Rinde PT/media res</div><div class="value" id="frd2">–</div><div class="sub">despostada / media res</div></div>
       <div class="kpi"><div class="label">Semanas</div><div class="value" id="fsem">–</div><div class="sub">con producción</div></div>
     </div>
 
@@ -381,8 +382,8 @@ tr:hover td{background:rgba(59,130,246,.04)}tr.hl td{font-weight:700;color:var(-
       <div class="kpi"><div class="label">Faena total</div><div class="value" id="cf">–</div><div class="sub" id="cfs">–</div></div>
       <div class="kpi green"><div class="label">Aptos total</div><div class="value" id="ca">–</div><div class="sub" id="cas">–</div></div>
       <div class="kpi green"><div class="label">Cab/día prom.</div><div class="value" id="ccd">–</div><div class="sub">faena diaria</div></div>
-      <div class="kpi"><div class="label">Kg PT acum.</div><div class="value" id="cpt2">–</div><div class="sub">producto terminado</div></div>
-      <div class="kpi"><div class="label">Rinde desp. prom.</div><div class="value" id="crd">–</div><div class="sub">PT / pechos kg</div></div>
+      <div class="kpi"><div class="label">Rinde PT/media res</div><div class="value" id="cpt2">–</div><div class="sub">despostada / media res</div></div>
+      <div class="kpi"><div class="label">Rinde PT/pechos</div><div class="value" id="crd">–</div><div class="sub">PT / pechos kg</div></div>
       <div class="kpi"><div class="label">Semanas</div><div class="value" id="csem">–</div><div class="sub">con producción</div></div>
     </div>
     <div class="card">
@@ -522,7 +523,11 @@ function updateHome(){
   document.getElementById('h_a').innerHTML=fN(tA)+' <span style="font-size:14px;color:var(--accent2)">('+pct+'%)</span>';
   document.getElementById('h_as').textContent='% sobre faena';
   document.getElementById('h_pt').textContent=fTn(tPT)+' Tns';
-  const fr=EDF.reduce((a,e)=>a+e.rs,0);document.getElementById('h_r').textContent='$'+fmt(fr)}
+  // Resultado consolidado (todas las plantas)
+  let ecf=EC;
+  if(m!=='all'){const mNames={Oct:'Oct',Nov:'Nov',Dic:'Dic',Ene:'Ene',Feb:'Feb',Mar:'Mar'};
+    ecf=EC.filter(e=>e.m.includes(mNames[m]||''))}
+  const tr=ecf.reduce((a,e)=>a+e.rs,0);document.getElementById('h_r').textContent='$'+fmt(tr)}
 updateHome();
 const hm=EC.map(e=>e.m.replace(' 2025',' 25').replace(' 2026',' 26'));
 new Chart(document.getElementById('chHR'),{type:'bar',data:{labels:hm,datasets:[{label:'Resultado USD',data:EC.map(e=>e.rs),backgroundColor:EC.map(e=>e.rs>50000?'#10B981':e.rs>0?'#3B82F6':'#EF4444'),borderRadius:4,barThickness:24}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:G},ticks:{callback:v=>'$'+fmt(v)}},x:{grid:{display:false}}}}});
@@ -572,6 +577,9 @@ function updateFriar(){
   document.getElementById('fcd').textContent=tD>0?Math.round(tF/tD):'–';
   document.getElementById('fpt').textContent=fTn(tPT)+' Tns';
   document.getElementById('frd').textContent=tPK>0?(tPT/tPK*100).toFixed(1)+'%':'–';
+  // PT/media res estimado (media res ≈ pechos / 0.33)
+  const rdMR=tPK>0?(tPT/(tPK/0.33)*100).toFixed(1):'–';
+  document.getElementById('frd2').textContent=rdMR!=='–'?rdMR+'%':'–';
   document.getElementById('fsem').textContent=fl.length;
   const lb=fl.map(w=>w.l);
 
@@ -632,15 +640,13 @@ function updateCarca(){
   document.getElementById('cf').textContent=fN(tF);document.getElementById('cfs').textContent=fl.length+' sem · '+tD+' días';
   document.getElementById('ca').innerHTML=fN(tA)+' <span style="font-size:12px;color:var(--accent2)">('+pct+'%)</span>';document.getElementById('cas').textContent='aptitud total';
   document.getElementById('ccd').textContent=tD>0?Math.round(tF/tD):'–';
-  // Rinde despostada promedio (solo USA donde rd>0)
-  const rdArr=fl.filter(w=>w.rd>0);
+  // Rinde PT/media res (despostada, solo donde rd>0)
+  const rdArr=fl.filter(w=>w.rd>0&&w.rd<50);// <50 filtra Israel que tiene rd=58 (eso es PT/pechos)
   const rdAvg=rdArr.length>0?(rdArr.reduce((a,w)=>a+w.rd,0)/rdArr.length).toFixed(1):0;
   document.getElementById('cpt2').textContent=rdAvg>0?rdAvg+'%':'–';
-  document.getElementById('cpt2').closest('.kpi').querySelector('.label').textContent='Rinde desp. prom.';
-  document.getElementById('cpt2').closest('.kpi').querySelector('.sub').textContent='despostada / media res';
-  document.getElementById('crd').textContent=fN(Math.round(tF*240/1000))+' Tns';
-  document.getElementById('crd').closest('.kpi').querySelector('.label').textContent='Kg est. producción';
-  document.getElementById('crd').closest('.kpi').querySelector('.sub').textContent='estimado (240 kg/cab)';
+  // Rinde PT/pechos (solo Israel 2025 donde pk>0)
+  const tPK=fl.reduce((a,w)=>a+w.pk,0),tPT=fl.reduce((a,w)=>a+w.pt,0);
+  document.getElementById('crd').textContent=tPK>0?(tPT/tPK*100).toFixed(1)+'%':'s/d (solo Israel)';
   document.getElementById('csem').textContent=fl.length;
   document.getElementById('cChartTitle').textContent='Faena semanal y aptitud (%)' + (s!=='all'?' – '+s:'');
   const lb=fl.map(w=>w.l);
