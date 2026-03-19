@@ -12,7 +12,7 @@
      ═══════════════════════════════════════════════════════════ -->
 <script id="data-layer">
 // ── NELSON / FRIAR: datos semanales ─────────────────────────
-const W=[
+let W=[
 {l:"S6",s:"Israel 2025",d:"2025-02-03",f:1397,a:1020,p:73.0,pk:109428,pt:63598,rd:58.1,dd:5},
 {l:"S7",s:"Israel 2025",d:"2025-02-10",f:1277,a:959,p:75.1,pk:107977,pt:62394,rd:57.8,dd:5},
 {l:"S8",s:"Israel 2025",d:"2025-02-17",f:1069,a:780,p:73.0,pk:87289,pt:50429,rd:57.8,dd:5},
@@ -64,7 +64,7 @@ const W=[
 ];
 
 // ── CARCARAÑÁ / LEQUIO: datos semanales ─────────────────────
-const CW=[
+let CW=[
 {l:"S02",s:"Israel 2025",d:"2025-01-10",f:239,a:156,p:65.3,pk:0,pt:0,rd:0,dd:1},
 {l:"S03",s:"Israel 2025",d:"2025-01-13",f:997,a:653,p:65.5,pk:60720,pt:36000,rd:59.3,dd:5},
 {l:"S04",s:"Israel 2025",d:"2025-01-20",f:963,a:600,p:62.3,pk:54871,pt:31681,rd:57.7,dd:5},
@@ -91,7 +91,7 @@ const CW=[
 ];
 
 // ── CIERRES ECONÓMICOS por planta-mes ───────────────────────
-const ECD_PL=[
+let ECD_PL=[
 {m:"Jul 2025",t:"Friar",f:6651,a:4471,kg:319362,ig:95808},
 {m:"Jul 2025",t:"Matt",f:5001,a:3471,kg:227834,ig:22783},
 {m:"Ago 2025",t:"Friar",f:6382,a:4185,kg:264661,ig:79398},
@@ -114,25 +114,25 @@ const ECD_PL=[
 ];
 
 // ── Costos Higla (equipo: sueldos, comisiones, viáticos, OSDE)
-const COSTOS_HIGLA={
+let COSTOS_HIGLA={
 "Jul 2025":42695,"Ago 2025":38415,"Sep 2025":35075,"Oct 2025":22398,
 "Nov 2025":38247,"Dic 2025":42204,"Ene 2026":40704,"Feb 2026":37195,"Mar 2026":22672
 };
 
 // ── Resultado consolidado mensual ───────────────────────────
-const RES_CONSOLIDADO={
+let RES_CONSOLIDADO={
 "Jul 2025":79889,"Ago 2025":63944,"Sep 2025":40721,"Oct 2025":9868,
 "Nov 2025":79164,"Dic 2025":89761,"Ene 2026":104047,"Feb 2026":77716,"Mar 2026":302
 };
 
 // ── Recupero de contenedores (USD, solo Friar) ──────────────
-const RECUPERO_CONT={
+let RECUPERO_CONT={
 "Jul 2025":3992,"Ago 2025":3308,"Sep 2025":2836,"Oct 2025":1225,
 "Nov 2025":3664,"Dic 2025":4261,"Ene 2026":3993,"Feb 2026":773
 };
 
 // ── Friar: resultados económicos mensuales ──────────────────
-const EDF=[
+let EDF=[
 {m:"Jul 25",f:6651,a:4471,pc:67.2,kg:319362,ig:95808,co:42695,rs:79889},
 {m:"Ago 25",f:6382,a:4185,pc:65.6,kg:264661,ig:79398,co:38415,rs:63944},
 {m:"Sep 25",f:4651,a:3261,pc:70.1,kg:226902,ig:68071,co:35075,rs:40721},
@@ -145,7 +145,7 @@ const EDF=[
 ];
 
 // ── Mattievich/Carcarañá: resultados económicos mensuales ───
-const EDM=[
+let EDM=[
 {m:"Jul 25",f:5001,a:3471,pc:69.4,kg:227834,ig:22783},
 {m:"Ago 25",f:4379,a:2935,pc:67.0,kg:196521,ig:19652},
 {m:"Oct 25",f:782,a:433,pc:55.4,kg:16318,ig:1632},
@@ -156,7 +156,7 @@ const EDM=[
 ];
 
 // ── Consolidado económico ───────────────────────────────────
-const EC=[
+let EC=[
 {m:"Jul 2025",pl:"Friar+Matt",f:11652,a:7942,pc:68.2,kg:547195,ig:122584,co:42695,rs:79889},
 {m:"Ago 2025",pl:"Friar+Matt",f:10761,a:7120,pc:66.2,kg:461182,ig:102359,co:38415,rs:63944},
 {m:"Sep 2025",pl:"Friar",f:4651,a:3261,pc:70.1,kg:226902,ig:68071,co:35075,rs:40721},
@@ -169,7 +169,7 @@ const EC=[
 ];
 
 // ── Mix productivo American Meat ────────────────────────────
-const MX=[
+let MX=[
 {p:'Set Kosher cuarto del.',kg:36,r:'25,7%',fob:12000},{p:'R&L (incl. Picanha)',kg:12,r:'8,6%',fob:20000},
 {p:'Lomo',kg:2,r:'1,4%',fob:26000},{p:'Cuadril',kg:2.5,r:'1,8%',fob:14000},
 {p:'Bife Angosto',kg:4.5,r:'3,2%',fob:20000},{p:'Bife Ancho',kg:4,r:'2,9%',fob:22000},
@@ -685,6 +685,100 @@ new Chart(document.getElementById('cMx'),{type:'doughnut',data:{labels:tM.map(r=
 let sC=null;function runSim(){const pc=+document.getElementById('s_pc').value,rd=+document.getElementById('s_rd').value/100,pv=+document.getElementById('s_pv').value,cb=+document.getElementById('s_cb').value,tc=+document.getElementById('s_tc').value,eb=+document.getElementById('s_eb').value*1000,hc=+document.getElementById('s_hc').value,cx=+document.getElementById('s_cx').value,ob=+document.getElementById('s_ob').value,eq=+document.getElementById('s_eq').value;const pR=pc/rd,rF=pR+174-213,cmB=pv-rF,cmN=cmB-466,kR=cb*240,gA=cmN*kR,gU=gA/tc,eA=eb*(1-hc/100);document.getElementById('sr1').textContent=Math.round(cmN)+' AR$/kg';document.getElementById('sr2').textContent=(gU/1000).toFixed(1)+'k USD';document.getElementById('sr3').textContent=(eA/1000).toFixed(1)+'k USD';const cf=bCF(cx,ob,gU,eb,hc,eq);document.getElementById('sr4').textContent=cf.ro?'Mes '+cf.ro:'>48';document.getElementById('sr5').textContent=cf.rt?'Mes '+cf.rt:'>48';const lb=cf.ms.filter((_,i)=>i%2===0).map(m=>'M'+m);if(sC)sC.destroy();sC=new Chart(document.getElementById('cSm'),{type:'line',data:{labels:lb,datasets:[{label:'Acum. operativo',data:cf.ao.filter((_,i)=>i%2===0),borderColor:'#10B981',borderWidth:2.5,fill:false,pointRadius:1},{label:'Acum. total',data:cf.at.filter((_,i)=>i%2===0),borderColor:'#EF4444',borderWidth:2,borderDash:[5,3],fill:false,pointRadius:1},{label:'Flujo neto',data:cf.nA.filter((_,i)=>i%2===0),borderColor:'#3B82F6',borderWidth:1.5,fill:false,pointRadius:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:G}},x:{grid:{display:false}}}}})}
 function resetSim(){document.getElementById('s_pc').value=4750;document.getElementById('s_rd').value=60;document.getElementById('s_pv').value=8700;document.getElementById('s_cb').value=1600;document.getElementById('s_tc').value=1460;document.getElementById('s_eb').value=431.5;document.getElementById('s_hc').value=10;document.getElementById('s_cx').value=3.5;document.getElementById('s_ob').value=18;document.getElementById('s_eq').value=3.25;document.getElementById('s_di').value=21;runSim()}
 runSim();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SHEETS LOADER — Carga dinámica desde Google Sheets
+     Si falla (offline, sin acceso), usa los datos inline de arriba.
+     Para cambiar de Sheet: solo actualizar SHEET_ID.
+     ═══════════════════════════════════════════════════════════ -->
+<script id="sheets-loader">
+(async function(){
+  const SHEET_ID='1-gg_AtnkGxZjX5c47tB9MKTBGrCXJl9e';
+  const base=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
+
+  function parseLine(l){const r=[];let c='',q=false;
+    for(let i=0;i<l.length;i++){if(l[i]==='"')q=!q;else if(l[i]===','&&!q){r.push(c);c=''}else c+=l[i]}
+    r.push(c);return r}
+
+  function parseCSV(t){
+    const lns=t.replace(/^\uFEFF/,'').split('\n').filter(l=>l.trim());
+    if(lns.length<2)return[];
+    const hd=parseLine(lns[0]).map(h=>h.trim().replace(/^"|"$/g,''));
+    return lns.slice(1).map(l=>{
+      const vs=parseLine(l);const o={};
+      hd.forEach((h,i)=>{let v=(vs[i]||'').trim().replace(/^"|"$/g,'');
+        const n=parseFloat(v);o[h]=v===''?0:(!isNaN(n)&&!/[a-zA-Z]/.test(v)?n:v)});
+      return o})}
+
+  async function fetchSheet(name){
+    const r=await fetch(base+encodeURIComponent(name));
+    if(!r.ok)throw new Error(name+': '+r.status);
+    return parseCSV(await r.text())}
+
+  try{
+    const [nR,cR,cpR,crR,efR,emR,mxR]=await Promise.all([
+      fetchSheet('nelson_semanal'),fetchSheet('carca_semanal'),
+      fetchSheet('cierres_planta'),fetchSheet('costos_resultado'),
+      fetchSheet('econ_friar'),fetchSheet('econ_matt'),
+      fetchSheet('mix_american_meat')]);
+
+    // Nelson semanal
+    W=nR.map(r=>({l:r.label,s:r.temporada,d:String(r.fecha),f:r.faena||0,a:r.aptos||0,
+      p:r.pct||0,pk:r.pechos_kg||0,pt:r.pt_kg||0,rd:r.rinde||0,dd:r.dias||0}));
+
+    // Carcarañá semanal
+    CW=cR.map(r=>({l:r.label,s:r.temporada,d:String(r.fecha),f:r.faena||0,a:r.aptos||0,
+      p:r.pct||0,pk:0,pt:0,rd:r.rinde_desp||0,dd:r.dias||0}));
+
+    // Cierres por planta
+    ECD_PL=cpR.map(r=>({m:r.mes,t:r.planta,f:r.faena||0,a:r.aptos||0,
+      kg:r.kg_producidos||0,ig:r.ingreso_usd||0}));
+
+    // Costos, resultado, recupero (objetos indexados por mes)
+    COSTOS_HIGLA={};RES_CONSOLIDADO={};RECUPERO_CONT={};
+    crR.forEach(r=>{
+      COSTOS_HIGLA[r.mes]=r.costos_higla||0;
+      RES_CONSOLIDADO[r.mes]=r.resultado||0;
+      RECUPERO_CONT[r.mes]=r.recupero_cont||0});
+
+    // Friar económico mensual
+    EDF=efR.map(r=>({m:r.mes,f:r.faena||0,a:r.aptos||0,pc:r.pct||0,
+      kg:r.kg_producidos||0,ig:r.ingreso_usd||0,co:r.costos_usd||0,rs:r.resultado_usd||0}));
+
+    // Matt económico mensual
+    EDM=emR.map(r=>({m:r.mes,f:r.faena||0,a:r.aptos||0,pc:r.pct||0,
+      kg:r.kg_producidos||0,ig:r.ingreso_usd||0}));
+
+    // Consolidado = derivado de ECD_PL + costos
+    const meses=[...new Set(ECD_PL.map(e=>e.m))];
+    EC=meses.map(m=>{
+      const rows=ECD_PL.filter(e=>e.m===m);
+      const f=rows.reduce((s,r)=>s+r.f,0),a=rows.reduce((s,r)=>s+r.a,0);
+      return{m,pl:rows.map(r=>r.t).join('+'),f,a,pc:f>0?+(a/f*100).toFixed(1):0,
+        kg:rows.reduce((s,r)=>s+r.kg,0),ig:rows.reduce((s,r)=>s+r.ig,0)+(RECUPERO_CONT[m]||0),
+        co:COSTOS_HIGLA[m]||0,rs:RES_CONSOLIDADO[m]||0}});
+
+    // Mix American Meat
+    MX=mxR.map(r=>({p:r.producto,kg:r.kg_media_res||0,r:r.pct_rendimiento||'0%',fob:r.fob_usd_tn||0}));
+
+    // ── Re-renderizar todo con datos frescos ──
+    updateHome();renderCierres();updateFriar();updateEcon();updateCarca();
+
+    // Indicador visual
+    const ind=document.createElement('span');
+    ind.style.cssText='position:fixed;bottom:8px;right:8px;background:#10B981;color:#fff;padding:3px 10px;border-radius:12px;font-size:10px;font-family:sans-serif;opacity:.7;z-index:999';
+    ind.textContent='● Sheets sync';document.body.appendChild(ind);
+    setTimeout(()=>ind.style.opacity='0.3',3000);
+    console.log('✓ Datos cargados desde Google Sheets ('+W.length+' sem Nelson, '+CW.length+' sem Carca)');
+
+  }catch(e){
+    console.log('⚠ Sheets no disponible, usando datos locales:',e.message);
+    const ind=document.createElement('span');
+    ind.style.cssText='position:fixed;bottom:8px;right:8px;background:#F59E0B;color:#000;padding:3px 10px;border-radius:12px;font-size:10px;font-family:sans-serif;opacity:.7;z-index:999';
+    ind.textContent='● Datos locales';document.body.appendChild(ind);
+  }
+})();
 </script>
 </body>
 </html>
