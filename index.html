@@ -701,6 +701,19 @@ runSim();
     for(let i=0;i<l.length;i++){if(l[i]==='"')q=!q;else if(l[i]===','&&!q){r.push(c);c=''}else c+=l[i]}
     r.push(c);return r}
 
+  // Robusto contra locale AR: 6.651 = 6651, 22,3 = 22.3
+  function parseNum(v){
+    if(!v||/[a-zA-Z\/\-%]/.test(v))return null;
+    v=v.replace(/\s/g,'').replace(/^"|"$/g,'');
+    // "6.651" or "319.362" → dot = thousands (3 digits after dot)
+    if(/^\d{1,3}(\.\d{3})+$/.test(v))return parseInt(v.replace(/\./g,''));
+    // "6.651,5" → dot=thousands, comma=decimal
+    if(/^\d{1,3}(\.\d{3})+,\d+$/.test(v)){const p=v.split(',');return parseFloat(p[0].replace(/\./g,'')+'.'+p[1])}
+    // "22,3" or "65,5" → comma = decimal
+    if(/^\d+,\d+$/.test(v))return parseFloat(v.replace(',','.'));
+    // Standard "6651" or "22.3"
+    const n=parseFloat(v);return isNaN(n)?null:n}
+
   function parseCSV(t){
     const lns=t.replace(/^\uFEFF/,'').split('\n').filter(l=>l.trim());
     if(lns.length<2)return[];
@@ -708,13 +721,30 @@ runSim();
     return lns.slice(1).map(l=>{
       const vs=parseLine(l);const o={};
       hd.forEach((h,i)=>{let v=(vs[i]||'').trim().replace(/^"|"$/g,'');
-        const n=parseFloat(v);o[h]=v===''?0:(!isNaN(n)&&!/[a-zA-Z]/.test(v)?n:v)});
+        const n=parseNum(v);o[h]=v===''?0:(n!==null?n:v)});
       return o})}
 
   async function fetchSheet(name){
     const r=await fetch(base+encodeURIComponent(name));
     if(!r.ok)throw new Error(name+': '+r.status);
-    return parseCSV(await r.text())}
+    const txt=await r.text();
+    if(name==='nelson_semanal')console.log('RAW CSV (first 500 chars):',txt.substring(0,500));
+    return parseCSV(txt)}
+
+  // Normalizar fechas: Google puede exportar "1/10/2025" o "2025-01-10" o date serial
+  function normDate(v){
+    if(!v||v===0)return'';
+    const s=String(v);
+    // Ya es YYYY-MM-DD
+    if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.substring(0,10);
+    // DD/MM/YYYY o M/D/YYYY
+    const parts=s.split('/');
+    if(parts.length===3){
+      let [a,b,c]=parts;
+      if(+c>1900)return c+'-'+String(b).padStart(2,'0')+'-'+String(a).padStart(2,'0');
+      if(+a>1900)return a+'-'+String(b).padStart(2,'0')+'-'+String(c).padStart(2,'0');
+    }
+    return s}
 
   try{
     const [nR,cR,cpR,crR,efR,emR,mxR]=await Promise.all([
@@ -724,11 +754,11 @@ runSim();
       fetchSheet('mix_american_meat')]);
 
     // Nelson semanal
-    W=nR.map(r=>({l:r.label,s:r.temporada,d:String(r.fecha),f:r.faena||0,a:r.aptos||0,
+    W=nR.map(r=>({l:r.label,s:r.temporada,d:normDate(r.fecha),f:r.faena||0,a:r.aptos||0,
       p:r.pct||0,pk:r.pechos_kg||0,pt:r.pt_kg||0,rd:r.rinde||0,dd:r.dias||0}));
 
     // Carcarañá semanal
-    CW=cR.map(r=>({l:r.label,s:r.temporada,d:String(r.fecha),f:r.faena||0,a:r.aptos||0,
+    CW=cR.map(r=>({l:r.label,s:r.temporada,d:normDate(r.fecha),f:r.faena||0,a:r.aptos||0,
       p:r.pct||0,pk:0,pt:0,rd:r.rinde_desp||0,dd:r.dias||0}));
 
     // Cierres por planta
@@ -761,6 +791,13 @@ runSim();
 
     // Mix American Meat
     MX=mxR.map(r=>({p:r.producto,kg:r.kg_media_res||0,r:r.pct_rendimiento||'0%',fob:r.fob_usd_tn||0}));
+
+    // ── Diagnóstico (abrir consola F12 para ver) ──
+    console.table([{sheet:'nelson',rows:W.length,sample_f:W[0]?.f,sample_a:W[0]?.a,sample_d:W[0]?.d},
+      {sheet:'carca',rows:CW.length,sample_f:CW[0]?.f,sample_a:CW[0]?.a,sample_d:CW[0]?.d},
+      {sheet:'cierres',rows:ECD_PL.length,sample_f:ECD_PL[0]?.f,sample_ig:ECD_PL[0]?.ig},
+      {sheet:'costos',rows:Object.keys(COSTOS_HIGLA).length}]);
+    console.log('Raw CSV sample (nelson row 1):',nR[0]);
 
     // ── Re-renderizar todo con datos frescos ──
     updateHome();renderCierres();updateFriar();updateEcon();updateCarca();
